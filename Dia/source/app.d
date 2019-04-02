@@ -1,6 +1,7 @@
 import std.stdio;
+import Dia.GeneFieldNum;
 
 void main()
 {
-  writeln("Edit source/app.d to start your project.");
+  setFieldNum;
 }
