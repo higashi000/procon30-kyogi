@@ -20,16 +20,16 @@ int getFieldNum()
   return uniform(-16, 16, rnd);
 }
 
-void setFieldNum()
+void setFieldNum(ref int[][] field)
 {
-  import std.stdio;
+  import std.stdio, std.algorithm;
 
   int mapLenX;
   int mapLenY;
 
   getFieldSize(mapLenX, mapLenY);
 
-  int[][] field = new int[][](mapLenY, mapLenX);
+  field = new int[][](mapLenY, mapLenX);
 
   foreach (col; 0 .. mapLenY) {
     foreach (line; 0 .. mapLenX) {
@@ -37,11 +37,21 @@ void setFieldNum()
     }
   }
 
+  auto fieldCopy = field;
 
   foreach (col; 0 .. mapLenY) {
-    foreach (line; 0 .. mapLenX) {
-      write(field[col][line], " ");
+    foreach_reverse (line; 0 .. mapLenX) {
+      field[col] ~= fieldCopy[col][line];
     }
-    writeln;
+  }
+
+  fieldCopy = field;
+
+  foreach_reverse (col; 0 .. mapLenY) {
+    field ~= fieldCopy[col];
+  }
+
+  foreach (col; 0 .. mapLenY * 2) {
+    field[col].writeln;
   }
 }

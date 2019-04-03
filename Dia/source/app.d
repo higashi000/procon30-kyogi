@@ -3,5 +3,6 @@ import Dia.GeneFieldNum;
 
 void main()
 {
-  setFieldNum;
+  int[][] field;
+  field.setFieldNum;
 }
