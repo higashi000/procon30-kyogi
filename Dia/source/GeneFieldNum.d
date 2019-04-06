@@ -6,8 +6,8 @@ void getFieldSize(ref int x, ref int y)
 
   auto rnd = Random(unpredictableSeed);
 
-  x = uniform(5, 10, rnd);
-  y = uniform(5, 10, rnd);
+  x = uniform(10, 20, rnd);
+  y = uniform(10, 20, rnd);
 }
 
 int getFieldNum()
@@ -29,29 +29,54 @@ void setFieldNum(ref int[][] field)
 
   getFieldSize(mapLenX, mapLenY);
 
-  field = new int[][](mapLenY, mapLenX);
+  writeln(mapLenX, " ", mapLenY);
 
-  foreach (col; 0 .. mapLenY) {
-    foreach (line; 0 .. mapLenX) {
+  field = new int[][](mapLenY / 2, mapLenX / 2);
+
+  foreach (col; 0 .. mapLenY / 2) {
+    foreach (line; 0 .. mapLenX / 2) {
       field[col][line] = getFieldNum();
     }
   }
 
-  auto fieldCopy = field;
+  if ((mapLenX % 2) == 1) {
+    auto fieldCopy = field;
+    foreach (col; 0 .. mapLenY / 2) {
+      field[col] ~= getFieldNum();
+    }
 
-  foreach (col; 0 .. mapLenY) {
-    foreach_reverse (line; 0 .. mapLenX) {
-      field[col] ~= fieldCopy[col][line];
+    foreach (col; 0 .. (mapLenY / 2)) {
+      foreach_reverse (line; 0 .. (mapLenX / 2)) {
+        field[col] ~= fieldCopy[col][line];
+      }
+    }
+  } else {
+    auto fieldCopy = field;
+    foreach (col; 0 .. (mapLenY / 2)) {
+      foreach_reverse (line; 0 .. (mapLenX / 2)) {
+        field[col] ~= fieldCopy[col][line];
+      }
     }
   }
 
-  fieldCopy = field;
+  if ((mapLenY % 2) == 1) {
+    auto fieldCopy = field;
+    int[] addField;
+    foreach (line; 0 .. field.ptr.length)
+      addField ~= getFieldNum();
 
-  foreach_reverse (col; 0 .. mapLenY) {
-    field ~= fieldCopy[col];
+    field ~= addField;
+
+    foreach_reverse (col; 0 .. mapLenY / 2)
+      field ~= fieldCopy[col];
+
+  } else {
+    auto fieldCopy = field;
+
+    foreach_reverse (col; 0 .. mapLenY / 2)
+      field ~= fieldCopy[col];
   }
 
-  foreach (col; 0 .. mapLenY * 2) {
-    field[col].writeln;
-  }
+  foreach (i; 0 .. mapLenY)
+    writeln(field[i]);
 }
