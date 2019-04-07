@@ -1,4 +1,4 @@
-module Dia.GeneFieldNum;
+module Dia.GeneField;
 
 void getFieldSize(ref int x, ref int y)
 {
@@ -61,16 +61,19 @@ void setFieldNum(ref int[][] field)
 
   if ((mapLenY % 2) == 1) {
     int[] addField;
-    foreach (line; 0 .. (mapLenY / 2))
+    foreach (line; 0 .. (mapLenX / 2))
       addField ~= getFieldNum();
 
-    field ~= addField;
+    if (mapLenX % 2 == 1)
+      addField ~= getFieldNum();
+
     auto addFieldCopy = addField;
-    foreach_reverse (line; 0 .. addFieldCopy.length)
+    foreach_reverse (line; 0 .. addFieldCopy.length - (mapLenX % 2))
       addField ~= addFieldCopy[line];
+    field ~= addField;
     auto fieldCopy = field;
 
-    foreach_reverse (col; 0 .. (mapLenY / 2) + 1)
+    foreach_reverse (col; 0 .. (mapLenY / 2))
       field ~= fieldCopy[col];
 
   } else {
