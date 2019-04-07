@@ -60,14 +60,17 @@ void setFieldNum(ref int[][] field)
   }
 
   if ((mapLenY % 2) == 1) {
-    auto fieldCopy = field;
     int[] addField;
-    foreach (line; 0 .. field.ptr.length)
+    foreach (line; 0 .. (mapLenY / 2))
       addField ~= getFieldNum();
 
     field ~= addField;
+    auto addFieldCopy = addField;
+    foreach_reverse (line; 0 .. addFieldCopy.length)
+      addField ~= addFieldCopy[line];
+    auto fieldCopy = field;
 
-    foreach_reverse (col; 0 .. mapLenY / 2)
+    foreach_reverse (col; 0 .. (mapLenY / 2) + 1)
       field ~= fieldCopy[col];
 
   } else {
