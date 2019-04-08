@@ -1,4 +1,3 @@
-import std.stdio;
 import Dia.GeneField;
 import Dia.outputField;
 
