@@ -2,7 +2,7 @@ module Dia.GeneField;
 
 void getFieldSize(ref int x, ref int y)
 {
-  import std.random;
+  import std.random : Random, unpredictableSeed, uniform;
 
   auto rnd = Random(unpredictableSeed);
 
@@ -12,7 +12,7 @@ void getFieldSize(ref int x, ref int y)
 
 int getFieldNum()
 {
-  import std.random;
+  import std.random : Random, unpredictableSeed, uniform;
 
   auto rnd = Random(unpredictableSeed);
 
@@ -22,7 +22,7 @@ int getFieldNum()
 
 void setFieldNum(ref int[][] field)
 {
-  import std.stdio, std.algorithm;
+  import std.stdio : writeln;
 
   int mapLenX;
   int mapLenY;

@@ -1,6 +1,6 @@
 module Dia.outputField;
 
-import std.stdio;
+import std.stdio : File, write, writeln;
 
 void outputFieldDate(int[][] fieldDate)
 {
