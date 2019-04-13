@@ -1,5 +1,4 @@
-import Dia.GeneField;
-import Dia.outputField;
+import Dia.problemGenerator;
 
 void main()
 {
