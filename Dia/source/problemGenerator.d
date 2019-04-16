@@ -96,7 +96,7 @@ void outputFieldDate(int[][] fieldDate)
     foreach (line; 0 .. fieldDate[col].length) {
       outputFile.write(fieldDate[col][line]);
       if (line != fieldDate[col].length - 1)
-        outputFile.write(" ");
+        outputFile.write(",");
     }
     outputFile.writeln;
   }
