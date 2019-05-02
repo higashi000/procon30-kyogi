@@ -82,9 +82,6 @@ void setFieldNum(ref int[][] field)
     foreach_reverse (col; 0 .. mapLenY / 2)
       field ~= fieldCopy[col];
   }
-
-  foreach (i; 0 .. mapLenY)
-    writeln(field[i]);
 }
 
 void outputFieldDate(int[][] fieldDate)
