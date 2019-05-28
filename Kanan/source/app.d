@@ -2,6 +2,7 @@ import std.stdio;
 import Kanan.tile;
 import Kanan.greedy;
 import Kanan.color;
+import Kanan.dispField;
 
 void main()
 {
@@ -19,24 +20,7 @@ void main()
 
   Field[0][0].color = Color.Blue;
 
-  foreach (i; 0 .. 5) {
-    write("|");
-    foreach (j; 0 .. 5) {
-      dispTile(Field[i][j]);
-      write("|");
-    }
-    writeln;
-  }
+  disp(Field);
 
   writeln(whichDir);
-}
-
-void dispTile(Tile tile) {
-  if (tile.color == Color.White) {
-    writef("\033[0;47m%3d\033[0;39m", tile.tilePoint);
-  } else if (tile.color == Color.Red) {
-    writef("\033[0;41m%3d\033[0;39m", tile.tilePoint);
-  } else if (tile.color == Color.Blue) {
-    writef("\033[0;44m%3d\033[0;39m", tile.tilePoint);
-  }
 }
