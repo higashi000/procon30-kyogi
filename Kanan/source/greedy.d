@@ -31,7 +31,7 @@ void greedyAlgorithm(Tile[][] Field, int[] whichAgent, ref int[] whichDir) {
 }
 
 bool trueDir(int[] whichAgent, ulong fieldX, ulong fieldY, int dir) {
-  static immutable int[] dx = [-2, -1, 0, 1, 1, 1, 0, -1];
+  static immutable int[] dx = [-1, -1, 0, 1, 1, 1, 0, -1];
   static immutable int[] dy = [0, -1, -1, -1, 0, 1, 1, 1];
 
   if (whichAgent[0] + dx[dir] < 0)
