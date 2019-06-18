@@ -1,33 +1,49 @@
 module Kanan.greedy;
 
 import Kanan.tile : Tile;
+import std.stdio;
 
 void greedyAlgorithm(Tile[][] Field, int[] whichAgent, ref int[] whichDir) {
   import std.range : zip;
   import std.algorithm : sort;
   static immutable int[] dx = [-1, -1, 0, 1, 1, 1, 0, -1];
   static immutable int[] dy = [0, -1, -1, -1, 0, 1, 1, 1];
-  int[] dir = [0, 1, 2, 3, 4, 5, 6, 7];
-  int[] point = new int[8];
   int max = -17;
 
   foreach (i; 0 .. 8) {
-    int nowPoint = Field[whichAgent[0]][whichAgent[1]].tilePoint;
+    int nowPoint = Field[whichAgent[1]][whichAgent[0]].tilePoint;
+
     if (!trueDir(whichAgent, Field[0].length, Field.length, i))
       continue;
-    nowPoint += Field[whichAgent[0] + dx[i]][whichAgent[1] + dy[i]].tilePoint;
+
+    if (whichColor(Field[whichAgent[1]][whichAgent[0]], Field[whichAgent[1] + dy[i]][whichAgent[0] + dx[i]]))
+      nowPoint += Field[whichAgent[1] + dy[i]][whichAgent[0] + dx[i]].tilePoint;
+
     foreach (j; 0 .. 8) {
       int[2] nowAgentPos = [whichAgent[0] + dx[i], whichAgent[1] + dy[i]];
+
       if (!trueDir(nowAgentPos, Field[0].length, Field.length, j))
         continue;
-      nowPoint += Field[whichAgent[0] + dx[i] + dx[j]][whichAgent[1] + dy[i] + dy[j]].tilePoint;
+
+      if (whichColor(Field[nowAgentPos[1]][nowAgentPos[0]], Field[nowAgentPos[1] + dy[j]][nowAgentPos[0] + dx[j]]))
+        nowPoint += Field[nowAgentPos[1] + dy[j]][nowAgentPos[0] + dx[j]].tilePoint;
+
       if (nowPoint > max) {
         whichDir[0] = dx[i];
         whichDir[1] = dy[i];
         max = nowPoint;
       }
+      if (whichColor(Field[nowAgentPos[1]][nowAgentPos[0]], Field[nowAgentPos[1] + dy[j]][nowAgentPos[0] + dx[j]]))
+        nowPoint -= Field[nowAgentPos[1] + dy[j]][nowAgentPos[0] + dx[j]].tilePoint;
     }
   }
+}
+
+bool whichColor(Tile nowTile, Tile nextTile) {
+  if (nowTile.color == nextTile.color)
+    return false;
+  else
+    return true;
 }
 
 bool trueDir(int[] whichAgent, ulong fieldX, ulong fieldY, int dir) {

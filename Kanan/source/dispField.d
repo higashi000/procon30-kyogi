@@ -6,6 +6,13 @@ import Kanan.tile;
 
 void disp(Tile[][] field) {
   foreach (i; 0 .. field.length) {
+    write("+");
+    foreach (j; 0 .. field[0].length) {
+      write("---");
+      write("+");
+    }
+    writeln;
+
     write("|");
     foreach (j; 0 .. field[0].length) {
       dispTile(field[i][j]);
