@@ -1,11 +1,9 @@
 module Kanan.greedy;
 
 import Kanan.tile : Tile;
-import std.stdio;
+import Kanan.color;
 
 void greedyAlgorithm(Tile[][] Field, int[] whichAgent, ref int[] whichDir) {
-  import std.range : zip;
-  import std.algorithm : sort;
   static immutable int[] dx = [-1, -1, 0, 1, 1, 1, 0, -1];
   static immutable int[] dy = [0, -1, -1, -1, 0, 1, 1, 1];
   int max = -17;
@@ -16,8 +14,19 @@ void greedyAlgorithm(Tile[][] Field, int[] whichAgent, ref int[] whichDir) {
     if (!trueDir(whichAgent, Field[0].length, Field.length, i))
       continue;
 
+    if (Field[whichAgent[1]][whichAgent[0]].agent == Field[whichAgent[1] + dy[i]][whichAgent[0] + dx[i]].agent)
+      continue;
+
     if (whichColor(Field[whichAgent[1]][whichAgent[0]], Field[whichAgent[1] + dy[i]][whichAgent[0] + dx[i]]))
       nowPoint += Field[whichAgent[1] + dy[i]][whichAgent[0] + dx[i]].tilePoint;
+
+    if (Field[whichAgent[1] + dy[i]][whichAgent[0] + dx[i]].color != Color.White) {
+      if (whichColor(Field[whichAgent[1]][whichAgent[0]], Field[whichAgent[1] + dy[i]][whichAgent[0] + dx[i]])) {
+        updateMaxNum(whichDir, max, dx[i], dy[i], nowPoint);
+
+        continue;
+      }
+    }
 
     foreach (j; 0 .. 8) {
       int[2] nowAgentPos = [whichAgent[0] + dx[i], whichAgent[1] + dy[i]];
@@ -28,14 +37,19 @@ void greedyAlgorithm(Tile[][] Field, int[] whichAgent, ref int[] whichDir) {
       if (whichColor(Field[nowAgentPos[1]][nowAgentPos[0]], Field[nowAgentPos[1] + dy[j]][nowAgentPos[0] + dx[j]]))
         nowPoint += Field[nowAgentPos[1] + dy[j]][nowAgentPos[0] + dx[j]].tilePoint;
 
-      if (nowPoint > max) {
-        whichDir[0] = dx[i];
-        whichDir[1] = dy[i];
-        max = nowPoint;
-      }
+      updateMaxNum(whichDir, max, dx[i], dy[i], nowPoint);
+
       if (whichColor(Field[nowAgentPos[1]][nowAgentPos[0]], Field[nowAgentPos[1] + dy[j]][nowAgentPos[0] + dx[j]]))
         nowPoint -= Field[nowAgentPos[1] + dy[j]][nowAgentPos[0] + dx[j]].tilePoint;
     }
+  }
+}
+
+void updateMaxNum(ref int[] whichDir, ref int max, int dx, int dy, int nowPoint) {
+  if (nowPoint > max) {
+    whichDir[0] = dx;
+    whichDir[1] = dy;
+    max = nowPoint;
   }
 }
 
