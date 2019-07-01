@@ -12,10 +12,6 @@ void updateAgentColor(ref Tile[][] Field, ref int[] whereAgent, int[] whichDir) 
   Agent* nowPosAgent = &Field[whereAgent[1]][whereAgent[0]].agent;
   Agent* nextPosAgent = &Field[whereAgent[1] + whichDir[1]][whereAgent[0] + whichDir[0]].agent;
 
-  if (!trueDir(whereAgent, Field[0].length, Field.length, whichDir)) {
-    writeln("bad choice");
-    return;
-  }
 
   *nextPosAgent = *nowPosAgent;
   *nowPosAgent = Agent.Null;

@@ -65,11 +65,11 @@ void main()
     whichDirRed2[0] = dx[input];
     whichDirRed2[1] = dy[input];
 
-    greedyAlgorithm(Field, whereAgentBlue1, whichDirBlue1);
-    greedyAlgorithm(Field, whereAgentBlue2, whichDirBlue2);
-
     updateAgentColor(Field, whereAgentRed1, whichDirRed1);
     updateAgentColor(Field, whereAgentRed2, whichDirRed2);
+
+    greedyAlgorithm(Field, whereAgentBlue1, whichDirBlue1);
+    greedyAlgorithm(Field, whereAgentBlue2, whichDirBlue2);
     updateAgentColor(Field, whereAgentBlue1, whichDirBlue1);
     updateAgentColor(Field, whereAgentBlue2, whichDirBlue2);
 
