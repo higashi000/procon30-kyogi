@@ -3,7 +3,7 @@ module Kanan.field;
 import std.stdio;
 
 
-class Field {
+struct Field {
   import Kanan.tile;
   import Kanan.color;
   import Kanan.agent;
@@ -14,12 +14,6 @@ class Field {
     this.agentNum = agentNum;
     this.myTeamID = myTeamID;
     this.rivalTeamID = rivalTeamID;
-  }
-
-  this() {
-    this.fieldLenX = 0;
-    this.fieldLenY = 0;
-    this.agentNum = 0;
   }
 
   public {
