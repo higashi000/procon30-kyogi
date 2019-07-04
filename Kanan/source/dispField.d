@@ -4,19 +4,20 @@ import std.stdio;
 import Kanan.color;
 import Kanan.agent;
 import Kanan.tile;
+import Kanan.field;
 
-void disp(Tile[][] field) {
-  foreach (i; 0 .. field.length) {
+void disp(Field nowField) {
+  foreach (i; 0 .. nowField.tiles.length) {
     write("+");
-    foreach (j; 0 .. field[0].length) {
+    foreach (j; 0 .. nowField.tiles[0].length) {
       write("---");
       write("+");
     }
     writeln;
 
     write("|");
-    foreach (j; 0 .. field[0].length) {
-      dispTile(field[i][j]);
+    foreach (j; 0 .. nowField.tiles[0].length) {
+      dispTile(nowField.tiles[i][j]);
       write("|");
     }
     writeln;
