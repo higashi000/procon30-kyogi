@@ -3,7 +3,11 @@
 		"higashi"
 	],
 	"copyright": "Copyright © 2019, higashi",
-	"description": "A minimal D application.",
+  "dependencies": {
+    "msgpack-d": "~.1.0.0-beta.7",
+    "msgpack-rpc": ">=0.1.1"
+  },
+	"description": "NIT-Ok procon30 Solver",
 	"license": "proprietary",
 	"name": "kanan"
 }
