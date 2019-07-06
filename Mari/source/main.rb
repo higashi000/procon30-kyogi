@@ -5,7 +5,7 @@ jsonData = open("main.json") do |i|
   JSON.load(i)
 end
 
-connectGUI = MessagePack::RPC::Client.new('localhost', 8080)
+connectGUI = MessagePack::RPC::Client.new('127.0.0.1', 12345)
 
 fieldX = jsonData["width"]
 fieldY = jsonData["height"]
@@ -32,6 +32,4 @@ jsonData["teams"][1]["agents"].size.times do |i|
   end
 end
 
-
-p myAgentData
-p rivalAgentData
+connectGUI.call(:getMariData, fieldColor, myAgentData, rivalAgentData)
