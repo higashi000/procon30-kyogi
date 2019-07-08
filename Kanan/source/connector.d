@@ -5,7 +5,6 @@ import std.stdio;
 
 class KananConnector {
   rsvClientData rsvTemp;
-  int a;
 
   void getMariData(int[][] fieldColor, int[][] myAgentData, int[][] rivalAgentData)
   {
