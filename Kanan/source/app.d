@@ -1,15 +1,6 @@
-import std.stdio;
-import Kanan.tile;
-import Kanan.field;
-import Kanan.greedy;
-import Kanan.color;
-import Kanan.agent;
-import Kanan.dispField;
-import Kanan.updateField;
-import Kanan.connector;
-import Kanan.rsvData;
 import msgpack;
 import msgpackrpc;
+import Kanan.connector;
 
 void main()
 {
