@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+  "net"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -29,9 +30,27 @@ type FieldData struct {
 }
 
 func main() {
-  convertData := convertJsonToSendData()
+  listener, err := net.Listen("tcp", "127.0.0.1:8080")
+  if err != nil {
+    fmt.Println("error")
+    return
+  }
+  defer listener.Close()
 
-  fmt.Println(convertData)
+  for ;; {
+    connectClient(listener)
+  }
+}
+
+func connectClient(listener net.Listener) {
+  conn, err := listener.Accept()
+  if err != nil {
+    fmt.Println("error")
+    return
+  }
+  defer conn.Close()
+
+  conn.Write([]byte(convertJsonToSendData()))
 }
 
 func getFieldData() {
