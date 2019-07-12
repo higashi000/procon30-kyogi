@@ -59,7 +59,7 @@ func convertJsonToSendData() string {
   var convertData string
 
   convertData += strconv.Itoa(fieldData.Width)
-  convertData += "\n"
+  convertData += " "
 
   convertData += strconv.Itoa(fieldData.Height)
   convertData += "\n"
@@ -67,7 +67,9 @@ func convertJsonToSendData() string {
   for i := 0; i < fieldData.Height; i++ {
     for j := 0; j < fieldData.Width; j++ {
       convertData += strconv.Itoa(fieldData.Points[i][j])
-      convertData += ","
+      if j != fieldData.Width - 1 {
+        convertData += " "
+      }
     }
     convertData += "\n"
   }
@@ -81,28 +83,30 @@ func convertJsonToSendData() string {
   for i := 0; i < fieldData.Height; i++ {
     for j := 0; j < fieldData.Width; j++ {
       convertData += strconv.Itoa(fieldData.Tiled[i][j])
-      convertData += ","
+      if j != fieldData.Width - 1 {
+        convertData += " "
+      }
     }
     convertData += "\n"
   }
 
+  convertData += strconv.Itoa(len(fieldData.Teams[0].Agents))
+  convertData += "\n"
   for i := 0; i < 2; i++ {
     convertData += strconv.Itoa(fieldData.Teams[i].TeamID)
-    convertData += "\n"
-    convertData += strconv.Itoa(len(fieldData.Teams[i].Agents))
     convertData += "\n"
 
     for j := 0; j < len(fieldData.Teams[i].Agents); j++ {
       convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].AgentID)
-      convertData += "\n"
+      convertData += " "
       convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X)
-      convertData += "\n"
+      convertData += " "
       convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y)
       convertData += "\n"
     }
 
     convertData += strconv.Itoa(fieldData.Teams[i].TilePoint)
-    convertData += "\n"
+    convertData += " "
     convertData += strconv.Itoa(fieldData.Teams[i].AreaPoint)
     convertData += "\n"
   }
