@@ -37,18 +37,27 @@ func main() {
   }
   defer listener.Close()
 
-  for ;; {
+  for {
     connectClient(listener)
+    go connectClient(listener)
   }
 }
 
 func connectClient(listener net.Listener) {
   conn, err := listener.Accept()
+
   if err != nil {
     fmt.Println("error")
     return
   }
   defer conn.Close()
+
+  rsvData := make([]byte, 4018)
+  n, err := conn.Read(rsvData)
+  if err != nil {
+    fmt.Println("error")
+  }
+  fmt.Println("connect", string(rsvData[:n]))
 
   conn.Write([]byte(convertJsonToSendData()))
 }
