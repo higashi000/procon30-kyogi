@@ -99,8 +99,9 @@ func convertJsonToSendData() string {
         convertData += " "
       }
     }
-    convertData += "\n"
+    convertData += ";"
   }
+  convertData += "\n"
 
   convertData += strconv.Itoa(fieldData.StartedAtUnixTime)
   convertData += "\n"
@@ -115,8 +116,9 @@ func convertJsonToSendData() string {
         convertData += " "
       }
     }
-    convertData += "\n"
+    convertData += ";"
   }
+  convertData += "\n"
 
   convertData += strconv.Itoa(len(fieldData.Teams[0].Agents))
   convertData += "\n"
