@@ -40,7 +40,7 @@ func main() {
   fmt.Scan(&ip)
   fmt.Print("port >> ")
   fmt.Scan(&port)
-  fmt.Println("myTeamID >> ")
+  fmt.Print("myTeamID >> ")
   fmt.Scan(&myTeamID)
 
   serverAddress := ip + ":" + strconv.Itoa(port)
