@@ -30,6 +30,8 @@ type FieldData struct {
 	Actions []interface{} `json:"actions"`
 }
 
+var myTeamID int
+
 func main() {
   var ip string
   var port int
@@ -38,6 +40,8 @@ func main() {
   fmt.Scan(&ip)
   fmt.Print("port >> ")
   fmt.Scan(&port)
+  fmt.Println("myTeamID >> ")
+  fmt.Scan(&myTeamID)
 
   serverAddress := ip + ":" + strconv.Itoa(port)
 
@@ -150,25 +154,47 @@ func convertJsonToSendData() string {
 
   convertData += strconv.Itoa(len(fieldData.Teams[0].Agents))
   convertData += "\n"
-  for i := 0; i < 2; i++ {
-    convertData += strconv.Itoa(fieldData.Teams[i].TeamID)
-    convertData += "\n"
 
-    for j := 0; j < len(fieldData.Teams[i].Agents); j++ {
-      convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].AgentID)
+  if fieldData.Teams[0].TeamID == myTeamID {
+    for i := 0; i < 2; i++ {
+      convertData += strconv.Itoa(fieldData.Teams[i].TeamID)
+      convertData += "\n"
+
+      for j := 0; j < len(fieldData.Teams[i].Agents); j++ {
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].AgentID)
+        convertData += " "
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X)
+        convertData += " "
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y)
+        convertData += ";"
+      }
+      convertData += "\n"
+
+      convertData += strconv.Itoa(fieldData.Teams[i].TilePoint)
       convertData += " "
-      convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X)
-      convertData += " "
-      convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y)
-      convertData += ";"
+      convertData += strconv.Itoa(fieldData.Teams[i].AreaPoint)
+      convertData += "\n"
     }
-    convertData += "\n"
+  } else {
+    for i := 1; i >= 0; i-- {
+      convertData += strconv.Itoa(fieldData.Teams[i].TeamID)
+      convertData += "\n"
 
-    convertData += strconv.Itoa(fieldData.Teams[i].TilePoint)
-    convertData += " "
-    convertData += strconv.Itoa(fieldData.Teams[i].AreaPoint)
-    convertData += "\n"
+      for j := 0; j < len(fieldData.Teams[i].Agents); j++ {
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].AgentID)
+        convertData += " "
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X)
+        convertData += " "
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y)
+        convertData += ";"
+      }
+      convertData += "\n"
+
+      convertData += strconv.Itoa(fieldData.Teams[i].TilePoint)
+      convertData += " "
+      convertData += strconv.Itoa(fieldData.Teams[i].AreaPoint)
+      convertData += "\n"
+    }
   }
-
   return convertData
 }
