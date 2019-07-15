@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
   "strconv"
+  "net/http"
 )
 
 type FieldData struct {
@@ -30,7 +31,8 @@ type FieldData struct {
 }
 
 func main() {
-  listener, err := net.Listen("tcp", "127.0.0.1:8080")
+  listener, err := net.Listen("tcp", "127.0.0.1:8081")
+
   if err != nil {
     fmt.Println("error")
     return
@@ -62,9 +64,24 @@ func connectClient(listener net.Listener) {
   conn.Write([]byte(convertJsonToSendData()))
 }
 
-func getFieldData() {
-  // サーバーにリクエスト送るやつ
-  // そのうち書く
+func requestFieldData(matchID string, port string, rsvData *[]byte) {
+  proocon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID
+  procon30Token := "procon30_example_token"
+
+  req, err := http.NewRequest("GET", proocon30RequestUrl, nil)
+  if err != nil {
+    fmt.Println("error")
+    return
+  }
+  req.Header.Set("Authorization", procon30Token)
+
+  client := new(http.Client)
+  resp, err := client.Do(req)
+  defer resp.Body.Close()
+
+  rsvFieldData, _ := ioutil.ReadAll(resp.Body)
+
+  *rsvData = rsvFieldData
 }
 
 func sendAgentActions() {
@@ -75,12 +92,11 @@ func sendAgentActions() {
 func convertJsonToSendData() string {
   var fieldData FieldData
 
-  bytes, err := ioutil.ReadFile("main.json")
-  if err != nil {
-    log.Fatal(err)
-  }
+  var rsvData []byte
 
-  if err := json.Unmarshal(bytes, &fieldData); err != nil {
+  requestFieldData("1", "8080", &rsvData)
+
+  if err := json.Unmarshal(rsvData, &fieldData); err != nil {
     log.Fatal(err)
   }
 
