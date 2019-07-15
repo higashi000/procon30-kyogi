@@ -31,7 +31,19 @@ type FieldData struct {
 }
 
 func main() {
-  listener, err := net.Listen("tcp", "127.0.0.1:8081")
+  var ip string
+  var port int
+
+  fmt.Print("ip >> ")
+  fmt.Scan(&ip)
+  fmt.Print("port >> ")
+  fmt.Scan(&port)
+
+  serverAddress := ip + ":" + strconv.Itoa(port)
+
+  fmt.Println(serverAddress)
+
+  listener, err := net.Listen("tcp", serverAddress)
 
   if err != nil {
     fmt.Println("error")
