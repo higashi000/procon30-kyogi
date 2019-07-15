@@ -160,8 +160,9 @@ func convertJsonToSendData() string {
       convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X)
       convertData += " "
       convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y)
-      convertData += "\n"
+      convertData += ";"
     }
+    convertData += "\n"
 
     convertData += strconv.Itoa(fieldData.Teams[i].TilePoint)
     convertData += " "
