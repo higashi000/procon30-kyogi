@@ -1,6 +1,7 @@
 module Kanan.connector;
 
 import Kanan.rsvData;
+import Kanan.sendData;
 import std.socket;
 import std.conv;
 import std.stdio;
@@ -28,7 +29,7 @@ class KananConnector {
   {
     auto socket = new TcpSocket(new InternetAddress(ip, port));
 
-    socket.send("Solver");
+    socket.send("1");
 
     ubyte[4018] rsvData;
     ulong size = socket.receive(rsvData);
@@ -37,7 +38,31 @@ class KananConnector {
       rsvFieldData = cast(string)rsvData[0 .. size];
     }
 
+    writeln(rsvFieldData);
+
     socket.close();
+  }
+
+  void sendResult(Actions[] agentData)
+  {
+    auto socket = new TcpSocket(new InternetAddress(ip, port));
+
+    socket.send("2 ");
+
+    string sendData;
+
+    foreach (i; 0 .. agentData.length) {
+      sendData ~= agentData[i].agentID.to!string;
+      sendData ~= " ";
+      sendData ~= agentData[i].type;
+      sendData ~= " ";
+      sendData ~= agentData[i].dx.to!string;
+      sendData ~= " ";
+      sendData ~= agentData[i].dy.to!string;
+      sendData ~= ";";
+    }
+
+    socket.send(sendData);
   }
 
   rsvMariData parseFieldData()
