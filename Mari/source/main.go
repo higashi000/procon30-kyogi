@@ -83,18 +83,12 @@ func connectClient(listener net.Listener) {
   if err != nil {
     fmt.Println("error")
   }
-  fmt.Println("connect", string(rsvData[0]))
-
-  fmt.Println(string(rsvData[1:n]))
-
   switch string(rsvData[0]) {
-    case "2" :
-      sendResultData(conn, "8080", "1", string(rsvData[1:n]))
-    default :
+    case "1" :
       conn.Write([]byte(convertJsonToSendData()))
+    case "2" :
+      sendResultData(conn, "8080", "1", string(rsvData[2:n]))
   }
-
-  conn.Write([]byte(convertJsonToSendData()))
 }
 
 func sendResultData(conn net.Conn, port string, matchID string, rsvData string) {
@@ -110,8 +104,6 @@ func sendResultData(conn net.Conn, port string, matchID string, rsvData string) 
     sendMoveInform[i].Dx, _ = strconv.Atoi(agentData[2])
     sendMoveInform[i].Dy, _ = strconv.Atoi(agentData[3])
   }
-
-  fmt.Println(sendMoveInform)
 
   proocon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "action"
   procon30Token := "procon30_example_token"
