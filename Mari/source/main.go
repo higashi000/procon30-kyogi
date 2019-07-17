@@ -8,6 +8,7 @@ import (
 	"log"
   "strconv"
   "net/http"
+  "strings"
 )
 
 type FieldData struct {
@@ -28,6 +29,13 @@ type FieldData struct {
 		AreaPoint int `json:"areaPoint"`
 	} `json:"teams"`
 	Actions []interface{} `json:"actions"`
+}
+
+type Actions struct {
+  AgentID int `json:"agentID"`
+  MovePattern string `json:"type"`
+  Dx int `json:"dx"`
+  Dy int `json:"dy"`
 }
 
 var myTeamID int
@@ -75,9 +83,46 @@ func connectClient(listener net.Listener) {
   if err != nil {
     fmt.Println("error")
   }
-  fmt.Println("connect", string(rsvData[:n]))
+  switch string(rsvData[0]) {
+    case "1" :
+      conn.Write([]byte(convertJsonToSendData()))
+    case "2" :
+      sendResultData(conn, "8080", "1", string(rsvData[2:n]))
+  }
+}
 
-  conn.Write([]byte(convertJsonToSendData()))
+func sendResultData(conn net.Conn, port string, matchID string, rsvData string) {
+
+  parseData := strings.Split(rsvData, ";")
+
+  sendMoveInform := make([]Actions, len(parseData) - 1)
+
+  for i := 0; i < len(parseData) - 1; i++ {
+    agentData := strings.Split(parseData[i], " ")
+    sendMoveInform[i].AgentID, _ = strconv.Atoi(agentData[0])
+    sendMoveInform[i].MovePattern = agentData[1]
+    sendMoveInform[i].Dx, _ = strconv.Atoi(agentData[2])
+    sendMoveInform[i].Dy, _ = strconv.Atoi(agentData[3])
+  }
+
+  proocon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "action"
+  procon30Token := "procon30_example_token"
+
+  req, err := http.NewRequest(
+    "GET",
+    proocon30RequestUrl,
+    nil,
+  )
+  if err != nil {
+    fmt.Println("error")
+    return
+  }
+  req.Header.Set("Authorization", procon30Token)
+  req.Header.Add("Content-Type", "application/json")
+
+  client := new(http.Client)
+  resp, err := client.Do(req)
+  defer resp.Body.Close()
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
