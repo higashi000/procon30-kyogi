@@ -47,7 +47,7 @@ class KananConnector {
   {
     auto socket = new TcpSocket(new InternetAddress(ip, port));
 
-    socket.send("2");
+    socket.send("2 ");
 
     string sendData;
 
