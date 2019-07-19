@@ -20,7 +20,7 @@ class KananConnector {
   }
 
   private {
-    string rsvFieldData;
+    string fieldData;
     string ip;
     ushort port;
   }
@@ -35,10 +35,10 @@ class KananConnector {
     ulong size = socket.receive(rsvData);
 
     if (size > 0) {
-      rsvFieldData = cast(string)rsvData[0 .. size];
+      fieldData = cast(string)rsvData[0 .. size];
     }
 
-    writeln(rsvFieldData);
+    writeln(fieldData);
 
     socket.close();
   }
@@ -65,13 +65,11 @@ class KananConnector {
     socket.send(sendData);
   }
 
-  rsvMariData parseFieldData()
+  rsvFieldData parseFieldData()
   {
-    rsvMariData parseRsvData;
-    auto parseData = rsvFieldData.split("\n");
+    rsvFieldData parseRsvData;
+    auto parseData = fieldData.split("\n");
     int dataPos = 0;
-
-    rsvFieldData.writeln;
 
     parseRsvData.width = (parseData[0].split(" "))[0].to!int;
     parseRsvData.height = (parseData[0].split(" "))[1].to!int;
