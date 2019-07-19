@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/sakura
+sakura.so
+sakura.dylib
+sakura.dll
+sakura.a
+sakura.lib
+sakura-test-*
+*.exe
+*.o
+*.obj
+*.lst
