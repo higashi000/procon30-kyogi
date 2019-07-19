@@ -1,70 +1,47 @@
 module Kanan.field;
 
-import std.stdio;
-
+import Kanan.rsvData;
 
 struct Field {
-  import Kanan.tile;
-  import Kanan.color;
-  import Kanan.agent;
-
-  this(long fieldLenX, long fieldLenY, int agentNum, uint myTeamID, uint rivalTeamID) {
-    this.fieldLenX = fieldLenX;
-    this.fieldLenY = fieldLenY;
-    this.agentNum = agentNum;
-    this.myTeamID = myTeamID;
-    this.rivalTeamID = rivalTeamID;
+  this(rsvFieldData field) {
   }
 
   public {
-    long fieldLenX;
-    long fieldLenY;
-    uint agentNum;
-    uint myTeamID;
-    uint rivalTeamID;
-    uint[][] myAgentData;
-    uint[][] rivalAgentData;
-    Tile[][] tiles;
+    int width;
+    int height;
+    int[][] point;
+    int startedAtUnixTime;
+    int turn;
+    int[][] color;
+    int agentNum;
+    int myTeamID;
+    int[][] myAgentData;
+    int myTilePoint;
+    int myAreaPoint;
+    int rivalTeamID;
+    int[][] rivalAgentData;
+    int rivalTilePoint;
+    int rivalAreaPoint;
   }
 
-  void initField(int[][] tilePoint, int[][] fieldColor, int[][] myAgentPosID, int[][] rivalAgentPosID)
+  void calcTilePoint()
   {
-    foreach (i; 0 .. fieldLenY) {
-      foreach (j; 0 .. fieldLenX) {
-        tiles[i][j].tilePoint = tilePoint[i][j];
-        setColor(tiles[i][j], fieldColor[i][j]);
+    myTilePoint = 0;
+    rivalTilePoint = 0;
+    foreach (i; 0 .. height) {
+      foreach (j; 0 .. width) {
+        if (color[i][j] == myTeamID) {
+          myTilePoint += point[i][j];
+        }
+        if (color[i][j] == rivalTeamID) {
+          rivalTilePoint += point[i][j];
+        }
       }
     }
-
-    foreach (i; 0 .. agentNum) {
-      tiles[myAgentPosID[i][1]][myAgentPosID[i][0]].agent = Agent.Red;
-      tiles[rivalAgentPosID[i][1]][rivalAgentPosID[i][0]].agent = Agent.Blue;
-
-      foreach (j; 0 .. 3) {
-        myAgentData[i][j] = myAgentPosID[i][j];
-        rivalAgentData[i][j] = rivalAgentPosID[i][j];
-      }
-    }
   }
 
-  void setColor(ref Tile tile, int color)
+  void calcAreaPoint()
   {
-    if (color != 0) {
-      tile.color = (color == myTeamID ? Color.Red : Color.Blue);
-    } else {
-      tile.color = Color.White;
-    }
-  }
 
-  void setAgentDataLen()
-  {
-    uint len = 3;
-    myAgentData = new uint[][](agentNum, len);
-    rivalAgentData = new uint[][](agentNum, len);
-  }
-
-  void setFieldLen()
-  {
-    tiles = new Tile[][](fieldLenY, fieldLenX);
   }
 }
