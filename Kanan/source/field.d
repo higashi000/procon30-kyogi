@@ -58,9 +58,15 @@ struct Field {
     }
   }
 
-  void calcAreaPoint()
+  void calcAreaPoint(int teamID)
   {
-    myAreaPoint = 0;
+    int* areaPoint;
+    if (teamID == myTeamID)
+      areaPoint = &myAreaPoint;
+    else if (teamID == rivalTeamID)
+      areaPoint = &rivalAreaPoint;
+
+    *areaPoint = 0;
 
     bool[][] areaFlg = new bool[][](height, width);
     foreach (i; 0 .. height) {
@@ -78,8 +84,8 @@ struct Field {
         int myTile = 0;
 
         foreach (k; 0 .. 4) {
-          if ((color[i + dy[k]][j + dx[k]] == myTeamID || areaFlg[i + dy[k]][j + dx[k]]))
-            myTile += color[i][j] != myTeamID ? 1 : 0;
+          if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
+            myTile += color[i][j] != teamID ? 1 : 0;
         }
 
         if (myTile > 1) {
@@ -106,8 +112,8 @@ struct Field {
       foreach_reverse (j; 1 .. width - 1) {
         int myTile = 0;
         foreach (k; 0 .. 4) {
-          if ((color[i + dy[k]][j + dx[k]] == myTeamID || areaFlg[i + dy[k]][j + dx[k]]))
-            myTile += color[i][j] != myTeamID ? 1 : 0;
+          if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
+            myTile += color[i][j] != teamID ? 1 : 0;
         }
 
         if (myTile < 4)
@@ -120,7 +126,7 @@ struct Field {
     foreach (i; 0 .. height) {
       foreach (j; 0 .. width) {
         if (areaFlg[i][j])
-          myAreaPoint += abs(point[i][j]);
+          *areaPoint += abs(point[i][j]);
       }
     }
   }
