@@ -20,7 +20,6 @@ struct Node {
 
   Node* previousNode;
   Node*[] childNodes;
-  Node[] searchFinished;
 
   uint turn;
   Field field;
@@ -35,5 +34,43 @@ struct Node {
     }
 
     return ret;
+  }
+}
+
+class KananBeamSearch {
+  Node* previousNode;
+  Node*[] childNodes;
+  Node*[] searchFinished;
+
+  uint turn;
+  Field nowFieldState;
+  uint maxTurn;
+
+  this(Field nowFieldState, uint turn, uint maxTurn) {
+    this.previousNode = new Node(nowFieldState.fieldState, turn, [0, 0]);
+    this.childNodes = previousNode.getNextNodes();
+    this.turn = turn;
+    this.maxTurn = maxTurn;
+    this.nowFieldState = nowFieldState;
+  }
+
+  void searchAgentAction() {
+    import std.datetime : StopWatch;
+    import std.range : front, popFront;
+
+    while (childNodes.length > 0) {
+      auto nowNode = childNodes.front;
+      childNodes.popFront;
+
+      if (maxTurn == nowNode.turn) {
+        searchFinished ~= nowNode;
+        continue;
+      }
+
+
+      auto grandChildNode = nowNode.getNextNodes();
+
+      childNodes ~= grandChildNode;
+    }
   }
 }
