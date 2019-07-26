@@ -1,91 +1,119 @@
 module Kanan.field;
 
+struct NowField {
+  int width;
+  int height;
+  int[][] point;
+  int startedAtUnixTime;
+  int turn;
+  int[][] color;
+  int agentNum;
+  int myTeamID;
+  int[][] myAgentData;
+  int myTilePoint;
+  int myAreaPoint;
+  int rivalTeamID;
+  int[][] rivalAgentData;
+  int rivalTilePoint;
+  int rivalAreaPoint;
+  int maxTurn;
+}
 
 struct Field {
   import Kanan.rsvData : rsvFieldData;
   import std.conv : to;
   import std.math : abs;
 
-  this(rsvFieldData field) {
-    this.width = field.width;
-    this.height = field.height;
-    this.point = field.point;
-    this.startedAtUnixTime = field.startedAtUnixTime;
-    this.turn = field.turn;
-    this.color = field.color;
-    this.agentNum = field.agentNum;
-    this.myTeamID = field.myTeamID;
-    this.myAgentData = field.myAgentData;
-    this.myAreaPoint = field.myAreaPoint;
-    this.myTilePoint = field.myTilePoint;
-    this.rivalTeamID = field.rivalTeamID;
-    this.rivalAgentData = field.rivalAgentData;
-    this.rivalTilePoint = field.rivalTilePoint;
-    this.rivalAreaPoint = field.rivalAreaPoint;
+  this(NowField fieldState) {
+    this.fieldState = fieldState;
+    this.myMoveDir[0 .. $] = 0;
   }
 
-  public {
-    int width;
-    int height;
-    int[][] point;
-    int startedAtUnixTime;
-    int turn;
-    int[][] color;
-    int agentNum;
-    int myTeamID;
-    int[][] myAgentData;
-    int myTilePoint;
-    int myAreaPoint;
-    int rivalTeamID;
-    int[][] rivalAgentData;
-    int rivalTilePoint;
-    int rivalAreaPoint;
+  this(NowField fieldState, int[] myMoveDir) {
+    this.fieldState = fieldState;
+    this.myMoveDir = myMoveDir;
+    moveAgent;
+    calcTilePoint();
+    calcAreaPoint(fieldState.myTeamID);
+    calcAreaPoint(fieldState.rivalTeamID);
   }
 
+  NowField fieldState;
+  int[] myMoveDir;
+
+  // 移動方向
+  immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
+  immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
+
+
+  // エージェントの移動 {{{
+  void moveAgent()
+  {
+    import std.random : uniform;
+    import std.stdio : writeln;
+    foreach (i; 0 .. fieldState.agentNum) {
+      if (fieldState.myAgentData[i][1] + dx[myMoveDir[i]] < 0 || fieldState.width <= fieldState.myAgentData[i][1] + dx[myMoveDir[i]])
+        continue;
+      if (fieldState.myAgentData[i][2] + dy[myMoveDir[i]] < 0 || fieldState.height <= fieldState.myAgentData[i][2] + dy[myMoveDir[i]])
+        continue;
+      fieldState.myAgentData[i][1] += dx[myMoveDir[i]];
+      fieldState.myAgentData[i][2] += dy[myMoveDir[i]];
+    }
+
+    foreach (i; 0 .. fieldState.agentNum) {
+      fieldState.rivalAgentData[i][1] += dx[uniform(0, 8)];
+      fieldState.rivalAgentData[i][2] += dy[uniform(0, 8)];
+    }
+
+    writeln(fieldState.myAgentData[0][1 .. $]);
+  }
+  // }}}
+
+  // タイルポイント計算 {{{
   void calcTilePoint()
   {
-    myTilePoint = 0;
-    rivalTilePoint = 0;
-    foreach (i; 0 .. height) {
-      foreach (j; 0 .. width) {
-        if (color[i][j] == myTeamID) {
-          myTilePoint += point[i][j];
+    fieldState.myTilePoint = 0;
+    fieldState.rivalTilePoint = 0;
+    foreach (i; 0 .. fieldState.height) {
+      foreach (j; 0 .. fieldState.width) {
+        if (fieldState.color[i][j] == fieldState.myTeamID) {
+          fieldState.myTilePoint += fieldState.point[i][j];
         }
-        if (color[i][j] == rivalTeamID) {
-          rivalTilePoint += point[i][j];
+        if (fieldState.color[i][j] == fieldState.rivalTeamID) {
+          fieldState.rivalTilePoint += fieldState.point[i][j];
         }
       }
     }
   }
+  // }}}
 
+  // 領域ポイント計算 {{{
   void calcAreaPoint(int teamID)
   {
     int* areaPoint;
-    if (teamID == myTeamID)
-      areaPoint = &myAreaPoint;
-    else if (teamID == rivalTeamID)
-      areaPoint = &rivalAreaPoint;
+    if (teamID == fieldState.myTeamID)
+      areaPoint = &fieldState.myAreaPoint;
+    else if (teamID == fieldState.rivalTeamID)
+      areaPoint = &fieldState.rivalAreaPoint;
 
     *areaPoint = 0;
 
-    bool[][] areaFlg = new bool[][](height, width);
-    foreach (i; 0 .. height) {
-      foreach (j; 0 .. width) {
+    bool[][] areaFlg = new bool[][](fieldState.height, fieldState.width);
+    foreach (i; 0 .. fieldState.height) {
+      foreach (j; 0 .. fieldState.width) {
         areaFlg[i][j] = false;
       }
     }
-    int[] dx = [-1, 0, 1, 0];
-    int[] dy = [0, 1, 0, -1];
 
-    foreach (i; 1 .. height - 1) {
+    foreach (i; 1 .. fieldState.height - 1) {
       bool startArea = false;
       int startPos;
-      foreach (j; 1 .. width - 1) {
+      foreach (j; 1 .. fieldState.width - 1) {
         int myTile = 0;
 
-        foreach (k; 0 .. 4) {
-          if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
-            myTile += color[i][j] != teamID ? 1 : 0;
+        for (int k = 0; k < 8; k += 2) {
+          if ((fieldState.color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
+            myTile += fieldState.color[i][j] != teamID ? 1 : 0;
         }
 
         if (myTile > 1) {
@@ -96,7 +124,7 @@ struct Field {
           }
         }
 
-        if (color[i][j] == myTeamID && startArea) {
+        if (fieldState.color[i][j] == teamID && startArea) {
           startArea = false;
           startPos = to!int(j + 1);
         }
@@ -108,12 +136,13 @@ struct Field {
       }
     }
 
-    foreach_reverse (i; 1 .. height - 1) {
-      foreach_reverse (j; 1 .. width - 1) {
+    foreach_reverse (i; 1 .. fieldState.height - 1) {
+      foreach_reverse (j; 1 .. fieldState.width - 1) {
         int myTile = 0;
-        foreach (k; 0 .. 4) {
-          if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
-            myTile += color[i][j] != teamID ? 1 : 0;
+
+        for (int k = 0; k < 8; k += 2) {
+          if ((fieldState.color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
+            myTile += fieldState.color[i][j] != teamID ? 1 : 0;
         }
 
         if (myTile < 4)
@@ -121,13 +150,12 @@ struct Field {
       }
     }
 
-    myAreaPoint = 0;
-
-    foreach (i; 0 .. height) {
-      foreach (j; 0 .. width) {
+    foreach (i; 0 .. fieldState.height) {
+      foreach (j; 0 .. fieldState.width) {
         if (areaFlg[i][j])
-          *areaPoint += abs(point[i][j]);
+          *areaPoint += abs(fieldState.point[i][j]);
       }
     }
   }
+  // }}}
 }
