@@ -61,8 +61,13 @@ struct Field {
     }
 
     foreach (i; 0 .. fieldState.agentNum) {
-      fieldState.rivalAgentData[i][1] += dx[uniform(0, 8)];
-      fieldState.rivalAgentData[i][2] += dy[uniform(0, 8)];
+      int moveDir = uniform(0, 9);
+      if (fieldState.rivalAgentData[i][1] + dx[moveDir] < 0 || fieldState.width <= fieldState.rivalAgentData[i][1] + dx[moveDir])
+        continue;
+      if (fieldState.rivalAgentData[i][2] + dy[moveDir] < 0 || fieldState.height <= fieldState.rivalAgentData[i][2] + dy[moveDir])
+        continue;
+      fieldState.rivalAgentData[i][1] += dx[moveDir];
+      fieldState.rivalAgentData[i][2] += dy[moveDir];
     }
 
     writeln(fieldState.myAgentData[0][1 .. $]);
