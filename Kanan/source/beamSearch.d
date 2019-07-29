@@ -16,11 +16,13 @@ struct Node {
   this(NowField field, uint turn, int[] myMoveDir) {
     this.field = Field(field, myMoveDir);
     this.turn = turn;
+    this.evalValue = 0;
   }
 
   Node* previousNode;
   Node*[] childNodes;
 
+  int evalValue;
   uint turn;
   Field field;
 
@@ -55,22 +57,31 @@ class KananBeamSearch {
   }
 
   void searchAgentAction() {
-    import std.datetime : StopWatch;
     import std.range : front, popFront;
+    import std.algorithm : swap;
+    Node*[] grandChildNode;
+    int cnt = 0;
 
-    while (childNodes.length > 0) {
-      auto nowNode = childNodes.front;
-      childNodes.popFront;
+    while (1) {
+      while (childNodes.length > 0) {
+        auto nowNode = childNodes.front;
+        childNodes.popFront;
+        cnt++;
 
-      if (maxTurn == nowNode.turn) {
-        searchFinished ~= nowNode;
-        continue;
+        if (maxTurn == nowNode.turn) {
+          searchFinished ~= nowNode;
+          continue;
+        }
+
+
+        grandChildNode ~= nowNode.getNextNodes();
       }
-
-
-      auto grandChildNode = nowNode.getNextNodes();
-
-      childNodes ~= grandChildNode;
+      if (grandChildNode.length == 0)
+        break;
+      else
+        swap(childNodes, grandChildNode);
     }
+  writeln(cnt);
   }
+
 }
