@@ -1,13 +1,6 @@
 module Kanan.beamSearch;
 
-import Kanan.connector;
-import Kanan.agent;
-import Kanan.color;
 import Kanan.field;
-import Kanan.judgeTrueDir;
-import Kanan.rsvData;
-import Kanan.sendData;
-import Kanan.tile;
 import std.range;
 import std.stdio;
 
@@ -60,19 +53,16 @@ class KananBeamSearch {
     import std.range : front, popFront;
     import std.algorithm : swap;
     Node*[] grandChildNode;
-    int cnt = 0;
 
     while (1) {
       while (childNodes.length > 0) {
         auto nowNode = childNodes.front;
         childNodes.popFront;
-        cnt++;
 
         if (maxTurn == nowNode.turn) {
           searchFinished ~= nowNode;
           continue;
         }
-
 
         grandChildNode ~= nowNode.getNextNodes();
       }
@@ -81,7 +71,22 @@ class KananBeamSearch {
       else
         swap(childNodes, grandChildNode);
     }
-  writeln(cnt);
   }
+}
 
+unittest {
+  import Kanan.dispField : disp;
+  import Kanan.connector : KananConnector;
+  auto connector = new KananConnector("127.0.0.1", 8081);
+  connector.getFieldData;
+  auto field = connector.parseFieldData(2);
+
+  Field nowField = Field(field);
+
+  auto search = new KananBeamSearch(nowField, 1, 3);
+  search.searchAgentAction;
+
+  disp(search.searchFinished[0].field);
+  disp(search.searchFinished[1].field);
+  disp(search.searchFinished[2].field);
 }
