@@ -26,10 +26,10 @@ void disp(Field nowField) {
 
 void dispTile(int point, int color, int teamID) {
   if (color == 0) {
-    writef("\033[0;47m%3d\033[0;39m", point);
+    writef("%3d", point);
   } else if (color == teamID) {
     writef("\033[0;41m%3d\033[0;39m", point);
-  } else if (color != teamID) {
+  } else {
     writef("\033[0;44m%3d\033[0;39m", point);
   }
 }
