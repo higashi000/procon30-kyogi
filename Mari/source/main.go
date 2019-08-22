@@ -150,6 +150,7 @@ func sendAgentActions() {
   // そのうち書く
 }
 
+// JsonをsolverとGUIに送るために変換
 func convertJsonToSendData() string {
   var fieldData FieldData
 
