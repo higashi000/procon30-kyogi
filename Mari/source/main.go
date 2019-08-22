@@ -40,12 +40,14 @@ type Actions struct {
 }
 
 var myTeamID int
+var maxTurn string
 
 func main() {
   flag.Parse()
   args := flag.Args()
 
   myTeamID, _ = strconv.Atoi(args[2])
+  maxTurn = args[3]
   serverAddress := args[0] + ":" + args[1]
 
   fmt.Println(serverAddress)
@@ -237,5 +239,7 @@ func convertJsonToSendData() string {
       convertData += "\n"
     }
   }
+  convertData += maxTurn + "\n"
+
   return convertData
 }
