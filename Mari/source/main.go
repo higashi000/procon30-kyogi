@@ -9,6 +9,7 @@ import (
   "strconv"
   "net/http"
   "strings"
+  "flag"
 )
 
 type FieldData struct {
@@ -41,17 +42,11 @@ type Actions struct {
 var myTeamID int
 
 func main() {
-  var ip string
-  var port int
+  flag.Parse()
+  args := flag.Args()
 
-  fmt.Print("ip >> ")
-  fmt.Scan(&ip)
-  fmt.Print("port >> ")
-  fmt.Scan(&port)
-  fmt.Print("myTeamID >> ")
-  fmt.Scan(&myTeamID)
-
-  serverAddress := ip + ":" + strconv.Itoa(port)
+  myTeamID, _ = strconv.Atoi(args[2])
+  serverAddress := args[0] + ":" + args[1]
 
   fmt.Println(serverAddress)
 
