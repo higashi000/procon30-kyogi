@@ -2,6 +2,7 @@ module Kanan.connector;
 
 import Kanan.rsvData;
 import Kanan.sendData;
+import Kanan.field;
 import std.socket;
 import std.conv;
 import std.stdio;
@@ -65,9 +66,9 @@ class KananConnector {
     socket.send(sendData);
   }
 
-  rsvFieldData parseFieldData()
+  NowField parseFieldData()
   {
-    rsvFieldData parseRsvData;
+    NowField parseRsvData;
     auto parseData = fieldData.split("\n");
     int dataPos = 0;
 
@@ -116,6 +117,7 @@ class KananConnector {
     parseRsvData.rivalTilePoint = (parseData[11].split)[0].to!int;
     parseRsvData.rivalAreaPoint = (parseData[11].split)[1].to!int;
 
+    parseRsvData.maxTurn = parseData[12].to!int;
 
     writeln(parseRsvData);
     return parseRsvData;
