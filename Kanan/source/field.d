@@ -7,7 +7,7 @@ struct Field {
   import std.stdio : writeln;
   import std.algorithm : copy;
 
-  this(Field field, int[] myMoveDir, int num) {
+  this(Field field, int[] myMoveDir) {
     this.myMoveDir = myMoveDir;
     this.width = field.width;
     this.height = field.height;
@@ -24,7 +24,6 @@ struct Field {
     this.myAgentData = field.myAgentData;
     this.rivalTeamID = field.rivalTeamID;
     this.rivalAgentData = field.rivalAgentData;
-    this.num = num;
 
     calcTilePoint();
     calcAreaPoint(myTeamID);
@@ -65,7 +64,6 @@ struct Field {
   int rivalAreaPoint;
   int maxTurn;
   int turn;
-  int num;
 
   // 移動方向
   immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
