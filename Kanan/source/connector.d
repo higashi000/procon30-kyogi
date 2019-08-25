@@ -66,9 +66,9 @@ class KananConnector {
     socket.send(sendData);
   }
 
-  NowField parseFieldData()
+  Field parseFieldData()
   {
-    NowField parseRsvData;
+    Field parseRsvData;
     auto parseData = fieldData.split("\n");
     int dataPos = 0;
 
@@ -119,7 +119,6 @@ class KananConnector {
 
     parseRsvData.maxTurn = parseData[12].to!int;
 
-    writeln(parseRsvData);
     return parseRsvData;
   }
 }

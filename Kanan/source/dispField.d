@@ -7,17 +7,17 @@ import Kanan.tile;
 import Kanan.field;
 
 void disp(Field nowField) {
-  foreach (i; 0 .. nowField.fieldState.height) {
+  foreach (i; 0 .. nowField.height) {
     write("+");
-    foreach (j; 0 .. nowField.fieldState.width) {
+    foreach (j; 0 .. nowField.width) {
       write("---");
       write("+");
     }
     writeln;
 
     write("|");
-    foreach (j; 0 .. nowField.fieldState.height) {
-      dispTile(nowField.fieldState.point[i][j], nowField.fieldState.color[i][j], nowField.fieldState.myTeamID);
+    foreach (j; 0 .. nowField.height) {
+      dispTile(nowField.point[i][j], nowField.color[i][j], nowField.myTeamID);
       write("|");
     }
     writeln;

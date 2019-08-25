@@ -10,13 +10,13 @@ alias S = Array!(Node*);
 struct Node {
   import std.random : uniform;
   import Kanan.dispField;
-  this(NowField field, uint turn, int[] myMoveDir) {
-    this.field = Field(field, myMoveDir);
+  this(Field field, uint turn, int[] myMoveDir) {
+    this.field = Field(field, myMoveDir, uniform(0, 10000));
     this.turn = turn;
     this.evalValue = 0;
   }
 
-  this(NowField field, uint turn) {
+  this(Field field, uint turn) {
     this.field = Field(field);
     this.turn = turn;
     this.evalValue = 0;
@@ -35,10 +35,8 @@ struct Node {
 
     foreach (i ; 0 .. 9) {
       foreach (j; 0 .. 9) {
-        tmp = new Node(field.fieldState, turn + 1, [i, j]);
+        tmp = new Node(field, turn + 1, [i, j]);
         tmp.field.moveAgent();
-        tmp.field.disp;
-        writeln;
         ret ~= tmp;
       }
     }
@@ -49,34 +47,38 @@ struct Node {
 
 class KananBeamSearch {
   import Kanan.dispField;
-  import std.stdio : writeln;
-  import core.thread;
+  import std.stdio;
+  import std.range : front, popFront;
+  import std.algorithm : copy;
 
   S childNodes;
-  S grandChildNode;
+  Node[] searchFinished;
 
   uint turn;
   Field nowFieldState;
   uint maxTurn;
 
   this(Field nowFieldState, uint turn, uint maxTurn) {
-    this.childNodes = new Node(nowFieldState.fieldState, turn);
+    this.childNodes = new Node(nowFieldState, turn);
     this.turn = turn;
     this.maxTurn = maxTurn;
     this.nowFieldState = nowFieldState;
   }
 
   void searchAgentAction() {
-    while (!childNodes.empty()) {
+    S grandChildNode;
+
+    while(!childNodes.empty()) {
       Thread.sleep(dur!"seconds"(1));
+      grandChildNode.clear();
 
       foreach (e; childNodes) {
-        grandChildNode ~= e.getNextNodes;
+        if (e.turn == maxTurn) {
+          searchFinished ~= *e;
+        } else {
+          grandChildNode ~= e.getNextNodes;
+        }
       }
-
-      /* foreach (e; grandChildNode) { */
-      /*   e.field.num.writeln; */
-      /* } */
 
       childNodes.clear();
       childNodes.reserve(grandChildNode.length);
@@ -91,7 +93,7 @@ class KananBeamSearch {
 unittest {
   import Kanan.dispField : disp;
 
-  NowField field;
+  Field field;
   field.width = 6;
   field.height = 6;
   field.point = new int[][](6, 6);
@@ -130,16 +132,13 @@ unittest {
   field.myAreaPoint = 0;
   field.rivalTilePoint = 0;
   field.rivalAreaPoint = 0;
-  field.maxTurn = 3;
+  field.maxTurn = 2;
 
-  Field nowField = Field(field);
-
-  auto search = new KananBeamSearch(nowField, 0, 2);
+  auto search = new KananBeamSearch(field, 1, 3);
   search.searchAgentAction;
 
-  /* foreach (i; 0 .. search.searchFinished.length) { */
-  /*   disp(search.searchFinished[i].field); */
-  /*   writef("%s", &search.searchFinished[i].field); */
-  /*   writeln; */
-  /* } */
+  foreach (e; search.searchFinished) {
+    e.field.disp;
+    writeln;
+  }
 }

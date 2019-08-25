@@ -1,11 +1,58 @@
 module Kanan.field;
 
-struct NowField {
+struct Field {
+  import Kanan.rsvData : rsvFieldData;
+  import std.conv : to;
+  import std.math : abs;
+  import std.stdio : writeln;
+  import std.algorithm : copy;
+
+  this(Field field, int[] myMoveDir, int num) {
+    this.myMoveDir = myMoveDir;
+    this.width = field.width;
+    this.height = field.height;
+    this.point = field.point;
+    this.startedAtUnixTime = field.startedAtUnixTime;
+    color = new int[][](this.height, this.width);
+    foreach (i; 0 .. height) {
+      foreach (j; 0 .. width) {
+        this.color[i][j] = field.color[i][j];
+      }
+    }
+    this.agentNum = field.agentNum;
+    this.myTeamID = field.myTeamID;
+    this.myAgentData = field.myAgentData;
+    this.rivalTeamID = field.rivalTeamID;
+    this.rivalAgentData = field.rivalAgentData;
+    this.num = num;
+
+    calcTilePoint();
+    calcAreaPoint(myTeamID);
+    calcAreaPoint(rivalTeamID);
+  }
+
+  this(Field field) {
+    this.width = field.width;
+    this.height = field.height;
+    this.point = field.point;
+    this.startedAtUnixTime = field.startedAtUnixTime;
+    this.color = field.color;
+    this.agentNum = field.agentNum;
+    this.myTeamID = field.myTeamID;
+    this.myAgentData = field.myAgentData;
+    this.rivalTeamID = field.rivalTeamID;
+    this.rivalAgentData = field.rivalAgentData;
+
+    calcTilePoint();
+    calcAreaPoint(myTeamID);
+    calcAreaPoint(rivalTeamID);
+  }
+
+  int[] myMoveDir;
   int width;
   int height;
   int[][] point;
   int startedAtUnixTime;
-  int turn;
   int[][] color;
   int agentNum;
   int myTeamID;
@@ -17,29 +64,8 @@ struct NowField {
   int rivalTilePoint;
   int rivalAreaPoint;
   int maxTurn;
-}
-
-struct Field {
-  import Kanan.rsvData : rsvFieldData;
-  import std.conv : to;
-  import std.math : abs;
-
-  this(NowField fieldState) {
-    this.fieldState = fieldState;
-    this.myMoveDir[0 .. $] = 0;
-  }
-
-  this(NowField fieldState, int[] myMoveDir) {
-    this.fieldState = fieldState;
-    this.myMoveDir = myMoveDir;
-    moveAgent;
-    calcTilePoint();
-    calcAreaPoint(fieldState.myTeamID);
-    calcAreaPoint(fieldState.rivalTeamID);
-  }
-
-  NowField fieldState;
-  int[] myMoveDir;
+  int turn;
+  int num;
 
   // 移動方向
   immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
@@ -51,74 +77,64 @@ struct Field {
   {
     import std.random : uniform;
     import std.stdio : writeln;
-    foreach (i; 0 .. fieldState.agentNum) {
-      if (fieldState.myAgentData[i][1] + dx[myMoveDir[i]] < 0 || fieldState.width <= fieldState.myAgentData[i][1] + dx[myMoveDir[i]])
-        continue;
-      if (fieldState.myAgentData[i][2] + dy[myMoveDir[i]] < 0 || fieldState.height <= fieldState.myAgentData[i][2] + dy[myMoveDir[i]])
-        continue;
-      fieldState.myAgentData[i][1] += dx[myMoveDir[i]];
-      fieldState.myAgentData[i][2] += dy[myMoveDir[i]];
-    }
 
-    foreach (i; 0 .. fieldState.agentNum) {
-      int moveDir = uniform(0, 9);
-      if (fieldState.rivalAgentData[i][1] + dx[moveDir] < 0 || fieldState.width <= fieldState.rivalAgentData[i][1] + dx[moveDir])
-        continue;
-      if (fieldState.rivalAgentData[i][2] + dy[moveDir] < 0 || fieldState.height <= fieldState.rivalAgentData[i][2] + dy[moveDir])
-        continue;
-      fieldState.rivalAgentData[i][1] += dx[moveDir];
-      fieldState.rivalAgentData[i][2] += dy[moveDir];
+    switch (uniform(0, 2)) {
+      case 0:
+        color[uniform(0, height)][uniform(0, width)] = myTeamID;
+        break;
+      case 1:
+        color[uniform(0, height)][uniform(0, width)] = rivalTeamID;
+        break;
+      default:
     }
-
-    writeln(fieldState.myAgentData[0][1 .. $]);
   }
   // }}}
 
+  // ポイント関係 --- {{{
   // タイルポイント計算 {{{
   void calcTilePoint()
   {
-    fieldState.myTilePoint = 0;
-    fieldState.rivalTilePoint = 0;
-    foreach (i; 0 .. fieldState.height) {
-      foreach (j; 0 .. fieldState.width) {
-        if (fieldState.color[i][j] == fieldState.myTeamID) {
-          fieldState.myTilePoint += fieldState.point[i][j];
+    myTilePoint = 0;
+    rivalTilePoint = 0;
+    foreach (i; 0 .. height) {
+      foreach (j; 0 .. width) {
+        if (color[i][j] == myTeamID) {
+          myTilePoint += point[i][j];
         }
-        if (fieldState.color[i][j] == fieldState.rivalTeamID) {
-          fieldState.rivalTilePoint += fieldState.point[i][j];
+        if (color[i][j] == rivalTeamID) {
+          rivalTilePoint += point[i][j];
         }
       }
     }
   }
   // }}}
-
   // 領域ポイント計算 {{{
   void calcAreaPoint(int teamID)
   {
     int* areaPoint;
-    if (teamID == fieldState.myTeamID)
-      areaPoint = &fieldState.myAreaPoint;
-    else if (teamID == fieldState.rivalTeamID)
-      areaPoint = &fieldState.rivalAreaPoint;
+    if (teamID == myTeamID)
+      areaPoint = &myAreaPoint;
+    else if (teamID == rivalTeamID)
+      areaPoint = &rivalAreaPoint;
 
     *areaPoint = 0;
 
-    bool[][] areaFlg = new bool[][](fieldState.height, fieldState.width);
-    foreach (i; 0 .. fieldState.height) {
-      foreach (j; 0 .. fieldState.width) {
+    bool[][] areaFlg = new bool[][](height, width);
+    foreach (i; 0 .. height) {
+      foreach (j; 0 .. width) {
         areaFlg[i][j] = false;
       }
     }
 
-    foreach (i; 1 .. fieldState.height - 1) {
+    foreach (i; 1 .. height - 1) {
       bool startArea = false;
       int startPos;
-      foreach (j; 1 .. fieldState.width - 1) {
+      foreach (j; 1 .. width - 1) {
         int myTile = 0;
 
         for (int k = 0; k < 8; k += 2) {
-          if ((fieldState.color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
-            myTile += fieldState.color[i][j] != teamID ? 1 : 0;
+          if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
+            myTile += color[i][j] != teamID ? 1 : 0;
         }
 
         if (myTile > 1) {
@@ -129,7 +145,7 @@ struct Field {
           }
         }
 
-        if (fieldState.color[i][j] == teamID && startArea) {
+        if (color[i][j] == teamID && startArea) {
           startArea = false;
           startPos = to!int(j + 1);
         }
@@ -141,13 +157,13 @@ struct Field {
       }
     }
 
-    foreach_reverse (i; 1 .. fieldState.height - 1) {
-      foreach_reverse (j; 1 .. fieldState.width - 1) {
+    foreach_reverse (i; 1 .. height - 1) {
+      foreach_reverse (j; 1 .. width - 1) {
         int myTile = 0;
 
         for (int k = 0; k < 8; k += 2) {
-          if ((fieldState.color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
-            myTile += fieldState.color[i][j] != teamID ? 1 : 0;
+          if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
+            myTile += color[i][j] != teamID ? 1 : 0;
         }
 
         if (myTile < 4)
@@ -155,12 +171,13 @@ struct Field {
       }
     }
 
-    foreach (i; 0 .. fieldState.height) {
-      foreach (j; 0 .. fieldState.width) {
+    foreach (i; 0 .. height) {
+      foreach (j; 0 .. width) {
         if (areaFlg[i][j])
-          *areaPoint += abs(fieldState.point[i][j]);
+          *areaPoint += abs(point[i][j]);
       }
     }
   }
   // }}}
+  //}}}
 }
