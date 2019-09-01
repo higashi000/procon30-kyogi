@@ -30,16 +30,100 @@ struct Node {
 
   S getNextNodes() {
     S ret;
+
+    switch (field.agentNum) {
+      writeln("aaa");
+      case 2:
+        ret ~= nextNode2();
+        break;
+      case 3:
+        ret ~= nextNode3();
+        break;
+      case 4:
+        ret ~= nextNode4();
+        break;
+      case 5:
+        ret ~= nextNode5();
+        break;
+        // エージェントの人数が6人以上の場合，探索幅が大きすぎるので別途実装が必要
+        /* case 6: */
+        /*   ret ~= nextNode6(); */
+        /*   break; */
+        /* case 7: */
+        /*   ret ~= nextNode7(); */
+        /*   break; */
+        /* case 8: */
+        /*   ret ~= nextNode8(); */
+        /*   break; */
+      default:
+        break;
+    }
+
+    return ret;
+  }
+
+  S nextNode2() {
+    S ret;
     Node* tmp;
 
-    foreach (i ; 0 .. 9) {
+    foreach (i; 0 .. 9) {
       foreach (j; 0 .. 9) {
         tmp = new Node(field, turn + 1, [i, j]);
         tmp.field.moveAgent();
         ret ~= tmp;
       }
     }
+    return ret;
+  }
+  S nextNode3() {
+    S ret;
+    Node* tmp;
 
+    foreach (i; 0 .. 9) {
+      foreach (j; 0 .. 9) {
+        foreach (k; 0 .. 9) {
+          tmp = new Node(field, turn + 1, [i, j, k]);
+          tmp.field.moveAgent();
+          ret ~= tmp;
+        }
+      }
+    }
+    return ret;
+  }
+  S nextNode4() {
+    S ret;
+
+    Node* tmp;
+    foreach (i; 0 .. 9) {
+      foreach (j; 0 .. 9) {
+        foreach (k; 0 .. 9) {
+          foreach (l; 0 .. 9) {
+            tmp = new Node(field, turn + 1, [i, j, k, l]);
+            tmp.field.moveAgent();
+            ret ~= tmp;
+          }
+        }
+      }
+    }
+    return ret;
+  }
+  S nextNode5() {
+    S ret;
+
+    Node* tmp;
+    foreach (i; 0 .. 9) {
+      foreach (j; 0 .. 9) {
+        foreach (k; 0 .. 9) {
+          foreach (l; 0 .. 9) {
+            foreach (m; 0 .. 9) {
+              tmp = new Node(field, turn + 1, [i, j, k, l, m]);
+              tmp.field.moveAgent();
+              ret ~= tmp;
+            }
+          }
+        }
+      }
+    }
     return ret;
   }
 }
