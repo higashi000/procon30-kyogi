@@ -8,6 +8,10 @@ struct Field {
   import std.algorithm : copy;
 
   this(Field field, int[] myMoveDir) {
+    this.myMoveDir = new int[myMoveDir.length];
+    foreach (i; 0 .. myMoveDir.length) {
+      this.myMoveDir[i] = myMoveDir[i];
+    }
     this.myMoveDir = myMoveDir;
     this.width = field.width;
     this.height = field.height;
@@ -21,9 +25,19 @@ struct Field {
     }
     this.agentNum = field.agentNum;
     this.myTeamID = field.myTeamID;
-    this.myAgentData = field.myAgentData;
+    myAgentData = new int[][](this.agentNum, 3);
+    foreach (i; 0 .. agentNum) {
+      this.myAgentData[i][0] = field.myAgentData[i][0];
+      this.myAgentData[i][1] = field.myAgentData[i][1];
+      this.myAgentData[i][2] = field.myAgentData[i][2];
+    }
+    rivalAgentData = new int[][](this.agentNum, 3);
+    foreach (i; 0 .. agentNum) {
+      this.rivalAgentData[i][0] = field.rivalAgentData[i][0];
+      this.rivalAgentData[i][1] = field.rivalAgentData[i][1];
+      this.rivalAgentData[i][2] = field.rivalAgentData[i][2];
+    }
     this.rivalTeamID = field.rivalTeamID;
-    this.rivalAgentData = field.rivalAgentData;
 
     calcTilePoint();
     calcAreaPoint(myTeamID);
@@ -70,22 +84,102 @@ struct Field {
   immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
 
 
-  // エージェントの移動 {{{
+// エージェントの移動 {{{
   void moveAgent()
   {
     import std.random : uniform;
     import std.stdio : writeln;
+    int[][] tmpAgentPos = new int[][](agentNum * 2, 2);
 
-    switch (uniform(0, 2)) {
-      case 0:
-        color[uniform(0, height)][uniform(0, width)] = myTeamID;
-        break;
-      case 1:
-        color[uniform(0, height)][uniform(0, width)] = rivalTeamID;
-        break;
-      default:
+    // 現時点での移動先設定
+    foreach (i; 0 .. agentNum) {
+      // 自分のエージェント
+      tmpAgentPos[i][0] = myAgentData[i][1] + dx[myMoveDir[i]];
+      tmpAgentPos[i][1] = myAgentData[i][2] + dy[myMoveDir[i]];
+      // 相手のエージェント
+      tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1] + dx[uniform(0, 9)];
+      tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2] + dx[uniform(0, 9)];
+    }
+
+    checkDuplicate(true, tmpAgentPos);
+    checkDuplicate(true, tmpAgentPos);
+    checkDuplicate(false, tmpAgentPos);
+    checkDuplicate(false, tmpAgentPos);
+
+    foreach (i; 0 .. agentNum) {
+      if ((tmpAgentPos[i][0] < 0) || (width <= tmpAgentPos[i][0])) {
+        tmpAgentPos[i][0] = myAgentData[i][1];
+        tmpAgentPos[i][1] = myAgentData[i][2];
+      } else if ((tmpAgentPos[i][1] < 0) || (height <= tmpAgentPos[i][1])) {
+        tmpAgentPos[i][0] = myAgentData[i][1];
+        tmpAgentPos[i][1] = myAgentData[i][2];
+      }
+    }
+
+    foreach (i; agentNum .. agentNum *2) {
+      if ((tmpAgentPos[i][0] < 0) || (width <= tmpAgentPos[i][0])) {
+        tmpAgentPos[i][0] = rivalAgentData[i - agentNum][1];
+        tmpAgentPos[i][1] = rivalAgentData[i - agentNum][2];
+      } else if ((tmpAgentPos[i][1] < 0) || (height <= tmpAgentPos[i][1])) {
+        tmpAgentPos[i][0] = rivalAgentData[i - agentNum][1];
+        tmpAgentPos[i][1] = rivalAgentData[i - agentNum][2];
+      }
+    }
+
+    foreach (i; 0 .. agentNum) {
+      myAgentData[i][1] = tmpAgentPos[i][0];
+      myAgentData[i][2] = tmpAgentPos[i][1];
+      writeln(myAgentData[i]);
+      color[myAgentData[i][2]][myAgentData[i][1]] = myTeamID;
+    }
+    foreach (i; 0 .. agentNum) {
+      rivalAgentData[i][1] = tmpAgentPos[i + agentNum][0];
+      rivalAgentData[i][2] = tmpAgentPos[i + agentNum][1];
+      color[rivalAgentData[i][2]][rivalAgentData[i][1]] = rivalTeamID;
     }
   }
+
+  // 移動先の重複確認
+  // 重複があった場合は元の場所に戻す
+  void checkDuplicate(bool whichTeam, ref int[][] tmpAgentPos) {
+    if (whichTeam) {
+      foreach (i; 0 .. agentNum) {
+        foreach (j; 0 .. agentNum * 2) {
+          if (i != j && tmpAgentPos[i] == tmpAgentPos[j]) {
+            tmpAgentPos[i][0] = myAgentData[i][1];
+            tmpAgentPos[i][1] = myAgentData[i][2];
+
+            if (j < agentNum) {
+              tmpAgentPos[j][0] = myAgentData[j][1];
+              tmpAgentPos[j][1] = myAgentData[j][2];
+            } else {
+              tmpAgentPos[j][0] = rivalAgentData[j - agentNum][1];
+              tmpAgentPos[j][1] = rivalAgentData[j - agentNum][2];
+            }
+          }
+        }
+      }
+    } else {
+      foreach (i; 0 .. agentNum) {
+        foreach (j; 0 .. agentNum * 2) {
+          int nowTmpPos = i + agentNum;
+          if ((nowTmpPos != j) && (tmpAgentPos[nowTmpPos] == tmpAgentPos[j])) {
+            tmpAgentPos[nowTmpPos][0] = rivalAgentData[i][1];
+            tmpAgentPos[nowTmpPos][1] = rivalAgentData[i][2];
+
+            if (j < agentNum) {
+              tmpAgentPos[j][0] = myAgentData[j][1];
+              tmpAgentPos[j][1] = myAgentData[j][2];
+            } else {
+              tmpAgentPos[j][0] = rivalAgentData[j - agentNum][1];
+              tmpAgentPos[j][1] = rivalAgentData[j - agentNum][2];
+            }
+          }
+        }
+      }
+    }
+  }
+
   // }}}
 
   // ポイント関係 --- {{{

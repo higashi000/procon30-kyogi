@@ -32,7 +32,6 @@ struct Node {
     S ret;
 
     switch (field.agentNum) {
-      writeln("aaa");
       case 2:
         ret ~= nextNode2();
         break;
