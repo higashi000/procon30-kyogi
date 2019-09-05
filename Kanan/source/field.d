@@ -96,9 +96,15 @@ struct Field {
       // 自分のエージェント
       tmpAgentPos[i][0] = myAgentData[i][1] + dx[myMoveDir[i]];
       tmpAgentPos[i][1] = myAgentData[i][2] + dy[myMoveDir[i]];
+      if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == rivalTeamID) {
+        int[] tmp = [myAgentData[i][1], myAgentData[i][2]];
+        tmpAgentPos ~= tmp;
+      }
       // 相手のエージェント
-      tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1] + dx[uniform(0, 9)];
-      tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2] + dx[uniform(0, 9)];
+      /* tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1] + dx[uniform(0, 9)]; */
+      /* tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2] + dx[uniform(0, 9)]; */
+      tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1];
+      tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2];
     }
 
     checkDuplicate(true, tmpAgentPos);
@@ -106,6 +112,7 @@ struct Field {
     checkDuplicate(false, tmpAgentPos);
     checkDuplicate(false, tmpAgentPos);
 
+// エージェントがフィルード外に行かないようにする --- {{{
     foreach (i; 0 .. agentNum) {
       if ((tmpAgentPos[i][0] < 0) || (width <= tmpAgentPos[i][0])) {
         tmpAgentPos[i][0] = myAgentData[i][1];
@@ -115,8 +122,7 @@ struct Field {
         tmpAgentPos[i][1] = myAgentData[i][2];
       }
     }
-
-    foreach (i; agentNum .. agentNum *2) {
+    foreach (i; agentNum .. agentNum * 2) {
       if ((tmpAgentPos[i][0] < 0) || (width <= tmpAgentPos[i][0])) {
         tmpAgentPos[i][0] = rivalAgentData[i - agentNum][1];
         tmpAgentPos[i][1] = rivalAgentData[i - agentNum][2];
@@ -125,17 +131,25 @@ struct Field {
         tmpAgentPos[i][1] = rivalAgentData[i - agentNum][2];
       }
     }
+// }}}
 
     foreach (i; 0 .. agentNum) {
-      myAgentData[i][1] = tmpAgentPos[i][0];
-      myAgentData[i][2] = tmpAgentPos[i][1];
-      writeln(myAgentData[i]);
-      color[myAgentData[i][2]][myAgentData[i][1]] = myTeamID;
+      if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == rivalTeamID) {
+        color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] = 0;
+      } else {
+        myAgentData[i][1] = tmpAgentPos[i][0];
+        myAgentData[i][2] = tmpAgentPos[i][1];
+        color[myAgentData[i][2]][myAgentData[i][1]] = myTeamID;
+      }
     }
     foreach (i; 0 .. agentNum) {
-      rivalAgentData[i][1] = tmpAgentPos[i + agentNum][0];
-      rivalAgentData[i][2] = tmpAgentPos[i + agentNum][1];
-      color[rivalAgentData[i][2]][rivalAgentData[i][1]] = rivalTeamID;
+      if (color[tmpAgentPos[i + agentNum][1]][tmpAgentPos[i + agentNum][0]] == myTeamID) {
+        color[tmpAgentPos[i + agentNum][1]][tmpAgentPos[i + agentNum][0]] = 0;
+      } else {
+        rivalAgentData[i][1] = tmpAgentPos[i + agentNum][0];
+        rivalAgentData[i][2] = tmpAgentPos[i + agentNum][1];
+        color[rivalAgentData[i][2]][rivalAgentData[i][1]] = rivalTeamID;
+      }
     }
   }
 
@@ -144,7 +158,7 @@ struct Field {
   void checkDuplicate(bool whichTeam, ref int[][] tmpAgentPos) {
     if (whichTeam) {
       foreach (i; 0 .. agentNum) {
-        foreach (j; 0 .. agentNum * 2) {
+        foreach (j; 0 .. tmpAgentPos.length) {
           if (i != j && tmpAgentPos[i] == tmpAgentPos[j]) {
             tmpAgentPos[i][0] = myAgentData[i][1];
             tmpAgentPos[i][1] = myAgentData[i][2];
@@ -152,7 +166,7 @@ struct Field {
             if (j < agentNum) {
               tmpAgentPos[j][0] = myAgentData[j][1];
               tmpAgentPos[j][1] = myAgentData[j][2];
-            } else {
+            } else if (agentNum <= j && j < agentNum * 2){
               tmpAgentPos[j][0] = rivalAgentData[j - agentNum][1];
               tmpAgentPos[j][1] = rivalAgentData[j - agentNum][2];
             }
@@ -161,7 +175,7 @@ struct Field {
       }
     } else {
       foreach (i; 0 .. agentNum) {
-        foreach (j; 0 .. agentNum * 2) {
+        foreach (j; 0 .. tmpAgentPos.length) {
           int nowTmpPos = i + agentNum;
           if ((nowTmpPos != j) && (tmpAgentPos[nowTmpPos] == tmpAgentPos[j])) {
             tmpAgentPos[nowTmpPos][0] = rivalAgentData[i][1];
@@ -170,7 +184,7 @@ struct Field {
             if (j < agentNum) {
               tmpAgentPos[j][0] = myAgentData[j][1];
               tmpAgentPos[j][1] = myAgentData[j][2];
-            } else {
+            } else if (agentNum <= j && j < agentNum * 2){
               tmpAgentPos[j][0] = rivalAgentData[j - agentNum][1];
               tmpAgentPos[j][1] = rivalAgentData[j - agentNum][2];
             }
