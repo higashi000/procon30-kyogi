@@ -101,10 +101,12 @@ struct Field {
         tmpAgentPos ~= tmp;
       }
       // 相手のエージェント
-      /* tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1] + dx[uniform(0, 9)]; */
-      /* tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2] + dx[uniform(0, 9)]; */
-      tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1];
-      tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2];
+      tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1] + dx[uniform(0, 9)];
+      tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2] + dx[uniform(0, 9)];
+      if (color[tmpAgentPos[i + agentNum][1]][tmpAgentPos[i + agentNum][0]] == myTeamID) {
+        int[] tmp = [rivalAgentData[i][1], rivalAgentData[i][2]];
+        tmpAgentPos ~= tmp;
+      }
     }
 
     checkDuplicate(true, tmpAgentPos);
