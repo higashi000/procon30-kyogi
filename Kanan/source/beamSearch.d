@@ -10,10 +10,14 @@ alias S = Array!(Node*);
 struct Node {
   import std.random : uniform;
   import Kanan.dispField;
-  this(Field field, uint turn, int[] myMoveDir) {
+  this(Field field, uint turn, int[] myMoveDir, int[] originMoveDir) {
     this.field = Field(field, myMoveDir);
     this.turn = turn;
     this.evalValue = 0;
+    this.originMoveDir = new int[originMoveDir.length];
+    foreach (i; 0 .. originMoveDir.length) {
+      this.originMoveDir[i] = originMoveDir[i];
+    }
   }
 
   this(Field field, uint turn) {
@@ -23,65 +27,100 @@ struct Node {
   }
 
   S childNodes;
+  int[] originMoveDir;
 
   int evalValue;
   uint turn;
   Field field;
 
-  S getNextNodes() {
+  S getNextNodes(int originalTurn) {
     S ret;
 
-    switch (field.agentNum) {
-      case 2:
-        ret ~= nextNode2();
-        break;
-      case 3:
-        ret ~= nextNode3();
-        break;
-      case 4:
-        ret ~= nextNode4();
-        break;
-      case 5:
-        ret ~= nextNode5();
-        break;
-        // エージェントの人数が6人以上の場合，探索幅が大きすぎるので別途実装が必要
-        /* case 6: */
-        /*   ret ~= nextNode6(); */
-        /*   break; */
-        /* case 7: */
-        /*   ret ~= nextNode7(); */
-        /*   break; */
-        /* case 8: */
-        /*   ret ~= nextNode8(); */
-        /*   break; */
-      default:
-        break;
+    if (originalTurn == turn) {
+      switch (field.agentNum) {
+        case 2:
+          ret ~= nextNode2(true);
+          break;
+        case 3:
+          ret ~= nextNode3(true);
+          break;
+        case 4:
+          ret ~= nextNode4(true);
+          break;
+        case 5:
+          ret ~= nextNode5(true);
+          break;
+          // エージェントの人数が6人以上の場合，探索幅が大きすぎるので別途実装が必要
+          /* case 6: */
+          /*   ret ~= nextNode6(); */
+          /*   break; */
+          /* case 7: */
+          /*   ret ~= nextNode7(); */
+          /*   break; */
+          /* case 8: */
+          /*   ret ~= nextNode8(); */
+          /*   break; */
+        default:
+          break;
+      }
+    } else {
+      switch (field.agentNum) {
+        case 2:
+          ret ~= nextNode2(false);
+          break;
+        case 3:
+          ret ~= nextNode3(false);
+          break;
+        case 4:
+          ret ~= nextNode4(false);
+          break;
+        case 5:
+          ret ~= nextNode5(false);
+          break;
+          // エージェントの人数が6人以上の場合，探索幅が大きすぎるので別途実装が必要
+          /* case 6: */
+          /*   ret ~= nextNode6(); */
+          /*   break; */
+          /* case 7: */
+          /*   ret ~= nextNode7(); */
+          /*   break; */
+          /* case 8: */
+          /*   ret ~= nextNode8(); */
+          /*   break; */
+        default:
+          break;
+      }
     }
-
     return ret;
   }
 
-  S nextNode2() {
+  S nextNode2(bool originalTurn) {
     S ret;
     Node* tmp;
 
     foreach (i; 0 .. 9) {
       foreach (j; 0 .. 9) {
-        tmp = new Node(field, turn + 1, [i, j]);
+        if (originalTurn)
+          tmp = new Node(field, turn + 1, [i, j], [i, j]);
+        else
+          tmp = new Node(field, turn + 1, [i, j], originMoveDir);
         tmp.field.moveAgent();
         ret ~= tmp;
       }
     }
     return ret;
   }
-  S nextNode3() {
+  S nextNode3(bool originalTurn) {
     S ret;
     Node* tmp;
 
     foreach (i; 0 .. 9) {
       foreach (j; 0 .. 9) {
         foreach (k; 0 .. 9) {
-          tmp = new Node(field, turn + 1, [i, j, k]);
+          if (originalTurn)
+            tmp = new Node(field, turn + 1, [i, j, k], [i, j, k]);
+          else
+            tmp = new Node(field, turn + 1, [i, j, k], originMoveDir);
           tmp.field.moveAgent();
           ret ~= tmp;
         }
@@ -89,7 +128,7 @@ struct Node {
     }
     return ret;
   }
-  S nextNode4() {
+  S nextNode4(bool originalTurn) {
     S ret;
 
     Node* tmp;
@@ -97,7 +136,10 @@ struct Node {
       foreach (j; 0 .. 9) {
         foreach (k; 0 .. 9) {
           foreach (l; 0 .. 9) {
-            tmp = new Node(field, turn + 1, [i, j, k, l]);
+            if (originalTurn)
+              tmp = new Node(field, turn + 1, [i, j, k, l], [i, j, k, l]);
+            else
+              tmp = new Node(field, turn + 1, [i, j, k, l], originMoveDir);
             tmp.field.moveAgent();
             ret ~= tmp;
           }
@@ -106,7 +148,7 @@ struct Node {
     }
     return ret;
   }
-  S nextNode5() {
+  S nextNode5(bool originalTurn) {
     S ret;
 
     Node* tmp;
@@ -115,7 +157,10 @@ struct Node {
         foreach (k; 0 .. 9) {
           foreach (l; 0 .. 9) {
             foreach (m; 0 .. 9) {
-              tmp = new Node(field, turn + 1, [i, j, k, l, m]);
+              if (originalTurn)
+                tmp = new Node(field, turn + 1, [i, j, k, l, m], [i, j, k, l, m]);
+              else
+                tmp = new Node(field, turn + 1, [i, j, k, l, m], originMoveDir);
               tmp.field.moveAgent();
               ret ~= tmp;
             }
@@ -158,7 +203,7 @@ class KananBeamSearch {
         if (e.turn == maxTurn) {
           searchFinished ~= *e;
         } else {
-          grandChildNode ~= e.getNextNodes;
+          grandChildNode ~= e.getNextNodes(turn);
         }
       }
 
@@ -220,7 +265,6 @@ unittest {
   search.searchAgentAction;
 
   foreach (e; search.searchFinished) {
-    e.field.disp;
-    writeln;
+    e.originMoveDir.writeln;
   }
 }
