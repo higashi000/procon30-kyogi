@@ -7,35 +7,29 @@ import Kanan.tile;
 import Kanan.field;
 
 void disp(Field nowField) {
-  foreach (i; 0 .. nowField.tiles.length) {
+  foreach (i; 0 .. nowField.height) {
     write("+");
-    foreach (j; 0 .. nowField.tiles[0].length) {
+    foreach (j; 0 .. nowField.width) {
       write("---");
       write("+");
     }
     writeln;
 
     write("|");
-    foreach (j; 0 .. nowField.tiles[0].length) {
-      dispTile(nowField.tiles[i][j]);
+    foreach (j; 0 .. nowField.height) {
+      dispTile(nowField.point[i][j], nowField.color[i][j], nowField.myTeamID);
       write("|");
     }
     writeln;
   }
 }
 
-void dispTile(Tile tile) {
-  if (tile.color == Color.White) {
-    writef("\033[0;47m%3d\033[0;39m", tile.tilePoint);
-  } else if (tile.color == Color.Red) {
-    if (tile.agent == Agent.Red)
-      writef("\033[0;31;1m%3d\033[0;39m", tile.tilePoint);
-    else
-      writef("\033[0;41m%3d\033[0;39m", tile.tilePoint);
-  } else if (tile.color == Color.Blue) {
-    if (tile.agent == Agent.Blue)
-      writef("\033[0;34;1m%3d\033[0;39m", tile.tilePoint);
-    else
-      writef("\033[0;44m%3d\033[0;39m", tile.tilePoint);
+void dispTile(int point, int color, int teamID) {
+  if (color == 0) {
+    writef("%3d", point);
+  } else if (color == teamID) {
+    writef("\033[0;41m%3d\033[0;39m", point);
+  } else {
+    writef("\033[0;44m%3d\033[0;39m", point);
   }
 }

@@ -2,6 +2,7 @@ module Kanan.connector;
 
 import Kanan.rsvData;
 import Kanan.sendData;
+import Kanan.field;
 import std.socket;
 import std.conv;
 import std.stdio;
@@ -20,7 +21,7 @@ class KananConnector {
   }
 
   private {
-    string rsvFieldData;
+    string fieldData;
     string ip;
     ushort port;
   }
@@ -35,10 +36,10 @@ class KananConnector {
     ulong size = socket.receive(rsvData);
 
     if (size > 0) {
-      rsvFieldData = cast(string)rsvData[0 .. size];
+      fieldData = cast(string)rsvData[0 .. size];
     }
 
-    writeln(rsvFieldData);
+    writeln(fieldData);
 
     socket.close();
   }
@@ -65,13 +66,11 @@ class KananConnector {
     socket.send(sendData);
   }
 
-  rsvMariData parseFieldData()
+  Field parseFieldData()
   {
-    rsvMariData parseRsvData;
-    auto parseData = rsvFieldData.split("\n");
+    Field parseRsvData;
+    auto parseData = fieldData.split("\n");
     int dataPos = 0;
-
-    rsvFieldData.writeln;
 
     parseRsvData.width = (parseData[0].split(" "))[0].to!int;
     parseRsvData.height = (parseData[0].split(" "))[1].to!int;
@@ -118,8 +117,8 @@ class KananConnector {
     parseRsvData.rivalTilePoint = (parseData[11].split)[0].to!int;
     parseRsvData.rivalAreaPoint = (parseData[11].split)[1].to!int;
 
+    parseRsvData.maxTurn = parseData[12].to!int;
 
-    writeln(parseRsvData);
     return parseRsvData;
   }
 }
