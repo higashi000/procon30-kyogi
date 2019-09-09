@@ -242,7 +242,7 @@ struct Field {
       foreach (j; 1 .. width - 1) {
         int myTile = 0;
 
-        for (int k = 0; k < 8; k += 2) {
+        for (int k = 1; k < 9; k += 2) {
           if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
             myTile += color[i][j] != teamID ? 1 : 0;
         }
@@ -271,7 +271,7 @@ struct Field {
       foreach_reverse (j; 1 .. width - 1) {
         int myTile = 0;
 
-        for (int k = 0; k < 8; k += 2) {
+        for (int k = 1; k < 9; k += 2) {
           if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
             myTile += color[i][j] != teamID ? 1 : 0;
         }
