@@ -39,6 +39,7 @@ struct Field {
     }
     this.rivalTeamID = field.rivalTeamID;
 
+    moveAgent();
     calcTilePoint();
     calcAreaPoint(myTeamID);
     calcAreaPoint(rivalTeamID);
@@ -49,7 +50,12 @@ struct Field {
     this.height = field.height;
     this.point = field.point;
     this.startedAtUnixTime = field.startedAtUnixTime;
-    this.color = field.color;
+    this.color = new int[][](height, width);
+    foreach (i; 0 .. height) {
+      foreach (j; 0 .. width) {
+        this.color[i][j] = field.color[i][j];
+      }
+    }
     this.agentNum = field.agentNum;
     this.myTeamID = field.myTeamID;
     this.myAgentData = field.myAgentData;
@@ -219,15 +225,11 @@ struct Field {
   // 領域ポイント計算 {{{
   void calcAreaPoint(int teamID)
   {
-    int* areaPoint;
-    if (teamID == myTeamID)
-      areaPoint = &myAreaPoint;
-    else if (teamID == rivalTeamID)
-      areaPoint = &rivalAreaPoint;
-
-    *areaPoint = 0;
+    int areaPoint;
+    areaPoint = 0;
 
     bool[][] areaFlg = new bool[][](height, width);
+
     foreach (i; 0 .. height) {
       foreach (j; 0 .. width) {
         areaFlg[i][j] = false;
@@ -282,9 +284,13 @@ struct Field {
     foreach (i; 0 .. height) {
       foreach (j; 0 .. width) {
         if (areaFlg[i][j])
-          *areaPoint += abs(point[i][j]);
+          areaPoint += abs(point[i][j]);
       }
     }
+    if (teamID == myTeamID)
+      myAreaPoint = areaPoint;
+    else if (teamID == rivalTeamID)
+      rivalAreaPoint = areaPoint;
   }
   // }}}
   //}}}

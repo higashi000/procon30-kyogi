@@ -104,7 +104,6 @@ struct Node {
           tmp = new Node(field, turn + 1, [i, j], [i, j]);
         else
           tmp = new Node(field, turn + 1, [i, j], originMoveDir);
-        tmp.field.moveAgent();
         ret ~= tmp;
       }
     }
@@ -121,7 +120,6 @@ struct Node {
             tmp = new Node(field, turn + 1, [i, j, k], [i, j, k]);
           else
             tmp = new Node(field, turn + 1, [i, j, k], originMoveDir);
-          tmp.field.moveAgent();
           ret ~= tmp;
         }
       }
@@ -239,6 +237,9 @@ unittest {
   field.color[2][3] = 2;
   field.color[3][2] = 2;
 
+  field.color[2][4] = 1;
+  field.color[1][3] = 1;
+
   field.agentNum = 2;
   field.myTeamID = 1;
   field.rivalTeamID = 2;
@@ -260,11 +261,18 @@ unittest {
   field.rivalTilePoint = 0;
   field.rivalAreaPoint = 0;
   field.maxTurn = 2;
+  field.calcTilePoint;
+  field.calcAreaPoint(field.myTeamID);
+  field.calcAreaPoint(field.rivalTeamID);
+  field.disp;
+
+  writeln(field.myAreaPoint);
 
   auto search = new KananBeamSearch(field, 1, 3);
   search.searchAgentAction;
 
-  foreach (e; search.searchFinished) {
-    e.originMoveDir.writeln;
-  }
+  /* foreach (e; search.searchFinished) { */
+  /*   e.field.disp; */
+  /*   e.field.myAreaPoint.writeln; */
+  /* } */
 }
