@@ -41,8 +41,8 @@ struct Field {
 
     moveAgent();
     calcTilePoint();
-    calcAreaPoint(myTeamID);
-    calcAreaPoint(rivalTeamID);
+    calcMyAreaPoint();
+    calcRivalAreaPoint();
   }
 
   this(Field field) {
@@ -63,8 +63,8 @@ struct Field {
     this.rivalAgentData = field.rivalAgentData;
 
     calcTilePoint();
-    calcAreaPoint(myTeamID);
-    calcAreaPoint(rivalTeamID);
+    calcMyAreaPoint();
+    calcRivalAreaPoint();
   }
 
   int[] myMoveDir;
@@ -84,7 +84,8 @@ struct Field {
   int rivalAreaPoint;
   int maxTurn;
   int turn;
-  bool[][] areaFlg;
+  bool[][] myAreaPointFlg;
+  bool[][] rivalAreaPointFlg;
 
   // 移動方向
   immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
@@ -224,19 +225,18 @@ struct Field {
   }
   // }}}
   // 領域ポイント計算 {{{
-  void calcAreaPoint(int teamID)
+  void calcMyAreaPoint()
   {
     int areaPoint;
-    areaPoint = 0;
+    int teamID = myTeamID;
 
-    areaFlg = new bool[][](height, width);
+    myAreaPointFlg = new bool[][](height, width);
+
     foreach (i; 0 .. height) {
       foreach (j; 0 .. width) {
-        areaFlg[i][j] = false;
+        myAreaPointFlg[i][j] = false;
       }
     }
-
-
 
     foreach (i; 1 .. height - 1) {
       bool startArea = false;
@@ -245,12 +245,12 @@ struct Field {
         int myTile = 0;
 
         for (int k = 1; k < 9; k += 2) {
-          if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
+          if ((color[i + dy[k]][j + dx[k]] == teamID || myAreaPointFlg[i + dy[k]][j + dx[k]]))
             myTile += color[i][j] != teamID ? 1 : 0;
         }
 
         if (myTile > 1) {
-          areaFlg[i][j] = true;
+          myAreaPointFlg[i][j] = true;
           if (!startArea) {
             startArea = true;
             startPos = to!int(j);
@@ -263,7 +263,7 @@ struct Field {
         }
 
         if (myTile < 2 && startArea) {
-          areaFlg[i][startPos .. j + 1] = false;
+          myAreaPointFlg[i][startPos .. j + 1] = false;
           startArea = false;
         }
       }
@@ -274,18 +274,18 @@ struct Field {
         int myTile = 0;
 
         for (int k = 1; k < 9; k += 2) {
-          if ((color[i + dy[k]][j + dx[k]] == teamID || areaFlg[i + dy[k]][j + dx[k]]))
+          if ((color[i + dy[k]][j + dx[k]] == teamID || myAreaPointFlg[i + dy[k]][j + dx[k]]))
             myTile += color[i][j] != teamID ? 1 : 0;
         }
 
         if (myTile < 4)
-          areaFlg[i][j] = false;
+          myAreaPointFlg[i][j] = false;
       }
     }
 
     foreach (i; 0 .. height) {
       foreach (j; 0 .. width) {
-        if (areaFlg[i][j])
+        if (myAreaPointFlg[i][j])
           areaPoint += abs(point[i][j]);
       }
     }
@@ -294,6 +294,77 @@ struct Field {
     else if (teamID == rivalTeamID)
       rivalAreaPoint = areaPoint;
   }
+
+  void calcRivalAreaPoint()
+  {
+    int areaPoint;
+    int teamID = rivalTeamID;
+
+    rivalAreaPointFlg = new bool[][](height, width);
+
+    foreach (i; 0 .. height) {
+      foreach (j; 0 .. width) {
+        rivalAreaPointFlg[i][j] = false;
+      }
+    }
+
+    foreach (i; 1 .. height - 1) {
+      bool startArea = false;
+      int startPos;
+      foreach (j; 1 .. width - 1) {
+        int myTile = 0;
+
+        for (int k = 1; k < 9; k += 2) {
+          if ((color[i + dy[k]][j + dx[k]] == teamID || rivalAreaPointFlg[i + dy[k]][j + dx[k]]))
+            myTile += color[i][j] != teamID ? 1 : 0;
+        }
+
+        if (myTile > 1) {
+          rivalAreaPointFlg[i][j] = true;
+          if (!startArea) {
+            startArea = true;
+            startPos = to!int(j);
+          }
+        }
+
+        if (color[i][j] == teamID && startArea) {
+          startArea = false;
+          startPos = to!int(j + 1);
+        }
+
+        if (myTile < 2 && startArea) {
+          rivalAreaPointFlg[i][startPos .. j + 1] = false;
+          startArea = false;
+        }
+      }
+    }
+
+    foreach_reverse (i; 1 .. height - 1) {
+      foreach_reverse (j; 1 .. width - 1) {
+        int myTile = 0;
+
+        for (int k = 1; k < 9; k += 2) {
+          if ((color[i + dy[k]][j + dx[k]] == teamID || rivalAreaPointFlg[i + dy[k]][j + dx[k]]))
+            myTile += color[i][j] != teamID ? 1 : 0;
+        }
+
+        if (myTile < 4)
+          rivalAreaPointFlg[i][j] = false;
+      }
+    }
+
+    foreach (i; 0 .. height) {
+      foreach (j; 0 .. width) {
+        if (rivalAreaPointFlg[i][j])
+          areaPoint += abs(point[i][j]);
+      }
+    }
+    if (teamID == myTeamID)
+      myAreaPoint = areaPoint;
+    else if (teamID == rivalTeamID)
+      rivalAreaPoint = areaPoint;
+  }
+
   // }}}
   //}}}
 }

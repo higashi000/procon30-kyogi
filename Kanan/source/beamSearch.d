@@ -33,6 +33,7 @@ struct Node {
   uint turn;
   Field field;
 
+  // 子Nodeの生成
   S getNextNodes(int originalTurn) {
     S ret;
 
@@ -94,12 +95,14 @@ struct Node {
     return ret;
   }
 
+  // エージェントが2人だった場合のNode生成
   S nextNode2(bool originalTurn) {
     S ret;
     Node* tmp;
 
     foreach (i; 0 .. 9) {
       foreach (j; 0 .. 9) {
+        // 今のNodeが根本のNodeなら動きを渡す
         if (originalTurn)
           tmp = new Node(field, turn + 1, [i, j], [i, j]);
         else
@@ -109,6 +112,7 @@ struct Node {
     }
     return ret;
   }
+  // エージェントが3人だった場合のNode生成
   S nextNode3(bool originalTurn) {
     S ret;
     Node* tmp;
@@ -116,6 +120,7 @@ struct Node {
     foreach (i; 0 .. 9) {
       foreach (j; 0 .. 9) {
         foreach (k; 0 .. 9) {
+          // 今のNodeが根本のNodeなら動きを渡す
           if (originalTurn)
             tmp = new Node(field, turn + 1, [i, j, k], [i, j, k]);
           else
@@ -126,6 +131,7 @@ struct Node {
     }
     return ret;
   }
+  // エージェントが4人だった場合のNode生成
   S nextNode4(bool originalTurn) {
     S ret;
 
@@ -134,11 +140,11 @@ struct Node {
       foreach (j; 0 .. 9) {
         foreach (k; 0 .. 9) {
           foreach (l; 0 .. 9) {
+            // 今のNodeが根本のNodeなら動きを渡す
             if (originalTurn)
               tmp = new Node(field, turn + 1, [i, j, k, l], [i, j, k, l]);
             else
               tmp = new Node(field, turn + 1, [i, j, k, l], originMoveDir);
-            tmp.field.moveAgent();
             ret ~= tmp;
           }
         }
@@ -146,6 +152,7 @@ struct Node {
     }
     return ret;
   }
+  // エージェントが5人だった場合のNode生成
   S nextNode5(bool originalTurn) {
     S ret;
 
@@ -155,11 +162,11 @@ struct Node {
         foreach (k; 0 .. 9) {
           foreach (l; 0 .. 9) {
             foreach (m; 0 .. 9) {
+              // 今のNodeが根本のNodeなら動きを渡す
               if (originalTurn)
                 tmp = new Node(field, turn + 1, [i, j, k, l, m], [i, j, k, l, m]);
               else
                 tmp = new Node(field, turn + 1, [i, j, k, l, m], originMoveDir);
-              tmp.field.moveAgent();
               ret ~= tmp;
             }
           }
@@ -167,6 +174,12 @@ struct Node {
       }
     }
     return ret;
+  }
+
+  // 今のフィールドの評価
+  void evalField()
+  {
+
   }
 }
 
@@ -262,17 +275,15 @@ unittest {
   field.rivalAreaPoint = 0;
   field.maxTurn = 2;
   field.calcTilePoint;
-  field.calcAreaPoint(field.myTeamID);
-  field.calcAreaPoint(field.rivalTeamID);
-  field.disp;
-
-  writeln(field.myAreaPoint);
+  field.calcMyAreaPoint();
+  field.calcRivalAreaPoint();
 
   auto search = new KananBeamSearch(field, 1, 3);
   search.searchAgentAction;
 
-  /* foreach (e; search.searchFinished) { */
-  /*   e.field.disp; */
-  /*   e.field.myAreaPoint.writeln; */
-  /* } */
+  foreach (e; search.searchFinished) {
+    e.field.disp;
+    e.field.myAreaPoint.writeln;
+    e.field.rivalAreaPoint.writeln;
+  }
 }
