@@ -289,10 +289,7 @@ struct Field {
           areaPoint += abs(point[i][j]);
       }
     }
-    if (teamID == myTeamID)
-      myAreaPoint = areaPoint;
-    else if (teamID == rivalTeamID)
-      rivalAreaPoint = areaPoint;
+    myAreaPoint = areaPoint;
   }
 
   void calcRivalAreaPoint()
@@ -359,10 +356,7 @@ struct Field {
           areaPoint += abs(point[i][j]);
       }
     }
-    if (teamID == myTeamID)
-      myAreaPoint = areaPoint;
-    else if (teamID == rivalTeamID)
-      rivalAreaPoint = areaPoint;
+    rivalAreaPoint = areaPoint;
   }
 
   // }}}
