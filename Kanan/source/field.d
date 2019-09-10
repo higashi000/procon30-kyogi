@@ -84,6 +84,7 @@ struct Field {
   int rivalAreaPoint;
   int maxTurn;
   int turn;
+  bool[][] areaFlg;
 
   // 移動方向
   immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
@@ -228,13 +229,14 @@ struct Field {
     int areaPoint;
     areaPoint = 0;
 
-    bool[][] areaFlg = new bool[][](height, width);
-
+    areaFlg = new bool[][](height, width);
     foreach (i; 0 .. height) {
       foreach (j; 0 .. width) {
         areaFlg[i][j] = false;
       }
     }
+
+
 
     foreach (i; 1 .. height - 1) {
       bool startArea = false;
