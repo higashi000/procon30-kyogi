@@ -107,6 +107,7 @@ struct Node {
           tmp = new Node(field, turn + 1, [i, j], [i, j]);
         else
           tmp = new Node(field, turn + 1, [i, j], originMoveDir);
+        tmp.evalField();
         ret ~= tmp;
       }
     }
@@ -125,6 +126,7 @@ struct Node {
             tmp = new Node(field, turn + 1, [i, j, k], [i, j, k]);
           else
             tmp = new Node(field, turn + 1, [i, j, k], originMoveDir);
+          tmp.evalField();
           ret ~= tmp;
         }
       }
@@ -145,6 +147,7 @@ struct Node {
               tmp = new Node(field, turn + 1, [i, j, k, l], [i, j, k, l]);
             else
               tmp = new Node(field, turn + 1, [i, j, k, l], originMoveDir);
+            tmp.evalField();
             ret ~= tmp;
           }
         }
@@ -167,6 +170,7 @@ struct Node {
                 tmp = new Node(field, turn + 1, [i, j, k, l, m], [i, j, k, l, m]);
               else
                 tmp = new Node(field, turn + 1, [i, j, k, l, m], originMoveDir);
+              tmp.evalField();
               ret ~= tmp;
             }
           }
@@ -176,10 +180,23 @@ struct Node {
     return ret;
   }
 
-  // 今のフィールドの評価
+  // フィールドの評価
   void evalField()
   {
-
+    // エージェントの位置と領域ポイントの座標をいい感じに評価
+    int distance = 0; // エージェントと領域ポイントとの距離の合計
+    foreach (i; 0 .. field.height) {
+      foreach (j; 0 .. field.width) {
+        if (field.rivalAreaPointFlg[i][j]) {
+          foreach (k; field.myAgentData) {
+            distance += sqrt((pow(abs(k[1] - j), 2) + pow(abs(k[2] - i), 2)).to!double).to!int;
+          }
+        }
+      }
+    }
+    if (distance != 0) {
+      evalValue += 100 / distance;
+    }
   }
 }
 
@@ -228,6 +245,7 @@ class KananBeamSearch {
   }
 }
 
+// unittest {{{
 unittest {
   import Kanan.dispField : disp;
 
@@ -283,7 +301,7 @@ unittest {
 
   foreach (e; search.searchFinished) {
     e.field.disp;
-    e.field.myAreaPoint.writeln;
-    e.field.rivalAreaPoint.writeln;
+    e.evalValue.writeln;
   }
 }
+//}}}
