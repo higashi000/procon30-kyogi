@@ -8,9 +8,10 @@ Ubuntu18.04 LTS<br>
 - sourceフォルダ内で以下のコマンドを実行する
 
 ```
-go run main.go ip_address port maxTurn
+go run main.go ip_address port myTeamID maxTurn
 ```
 
 `ip_address`の部分はそれぞれのipを<br>
 `port`の部分はport番号を<br>
+`myTeamID`の部分は自チームのIDを<br>
 `maxTurn`はその試合の最大ターン数を入れる<br>
