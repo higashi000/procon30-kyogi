@@ -33,6 +33,7 @@ struct Node {
   uint turn;
   Field field;
 
+  // 子Nodeの生成 {{{
   S getNextNodes(int originalTurn) {
     S ret;
 
@@ -94,22 +95,25 @@ struct Node {
     return ret;
   }
 
+  // エージェントが2人だった場合のNode生成
   S nextNode2(bool originalTurn) {
     S ret;
     Node* tmp;
 
     foreach (i; 0 .. 9) {
       foreach (j; 0 .. 9) {
+        // 今のNodeが根本のNodeなら動きを渡す
         if (originalTurn)
           tmp = new Node(field, turn + 1, [i, j], [i, j]);
         else
           tmp = new Node(field, turn + 1, [i, j], originMoveDir);
-        tmp.field.moveAgent();
+        tmp.evalField();
         ret ~= tmp;
       }
     }
     return ret;
   }
+  // エージェントが3人だった場合のNode生成
   S nextNode3(bool originalTurn) {
     S ret;
     Node* tmp;
@@ -117,17 +121,19 @@ struct Node {
     foreach (i; 0 .. 9) {
       foreach (j; 0 .. 9) {
         foreach (k; 0 .. 9) {
+          // 今のNodeが根本のNodeなら動きを渡す
           if (originalTurn)
             tmp = new Node(field, turn + 1, [i, j, k], [i, j, k]);
           else
             tmp = new Node(field, turn + 1, [i, j, k], originMoveDir);
-          tmp.field.moveAgent();
+          tmp.evalField();
           ret ~= tmp;
         }
       }
     }
     return ret;
   }
+  // エージェントが4人だった場合のNode生成
   S nextNode4(bool originalTurn) {
     S ret;
 
@@ -136,11 +142,12 @@ struct Node {
       foreach (j; 0 .. 9) {
         foreach (k; 0 .. 9) {
           foreach (l; 0 .. 9) {
+            // 今のNodeが根本のNodeなら動きを渡す
             if (originalTurn)
               tmp = new Node(field, turn + 1, [i, j, k, l], [i, j, k, l]);
             else
               tmp = new Node(field, turn + 1, [i, j, k, l], originMoveDir);
-            tmp.field.moveAgent();
+            tmp.evalField();
             ret ~= tmp;
           }
         }
@@ -148,6 +155,7 @@ struct Node {
     }
     return ret;
   }
+  // エージェントが5人だった場合のNode生成
   S nextNode5(bool originalTurn) {
     S ret;
 
@@ -157,11 +165,12 @@ struct Node {
         foreach (k; 0 .. 9) {
           foreach (l; 0 .. 9) {
             foreach (m; 0 .. 9) {
+              // 今のNodeが根本のNodeなら動きを渡す
               if (originalTurn)
                 tmp = new Node(field, turn + 1, [i, j, k, l, m], [i, j, k, l, m]);
               else
                 tmp = new Node(field, turn + 1, [i, j, k, l, m], originMoveDir);
-              tmp.field.moveAgent();
+              tmp.evalField();
               ret ~= tmp;
             }
           }
@@ -169,6 +178,26 @@ struct Node {
       }
     }
     return ret;
+  }
+  // }}}
+
+  // フィールドの評価
+  void evalField()
+  {
+    // エージェントの位置と領域ポイントの座標をいい感じに評価
+    int distance = 0; // エージェントと領域ポイントとの距離の合計
+    foreach (i; 0 .. field.height) {
+      foreach (j; 0 .. field.width) {
+        if (field.rivalAreaPointFlg[i][j]) {
+          foreach (k; field.myAgentData) {
+            distance += sqrt((pow(abs(k[1] - j), 2) + pow(abs(k[2] - i), 2)).to!double).to!int;
+          }
+        }
+      }
+    }
+    if (distance != 0) {
+      evalValue += 100 / distance;
+    }
   }
 }
 
@@ -184,19 +213,20 @@ class KananBeamSearch {
   uint turn;
   Field nowFieldState;
   uint maxTurn;
+  uint searchWidth;
 
-  this(Field nowFieldState, uint turn, uint maxTurn) {
+  this(Field nowFieldState, uint turn, uint maxTurn, uint searchWidth) {
     this.childNodes = new Node(nowFieldState, turn);
     this.turn = turn;
     this.maxTurn = maxTurn;
     this.nowFieldState = nowFieldState;
+    this.searchWidth = searchWidth;
   }
 
   void searchAgentAction() {
     S grandChildNode;
 
     while(!childNodes.empty()) {
-      Thread.sleep(dur!"seconds"(1));
       grandChildNode.clear();
 
       foreach (e; childNodes) {
@@ -210,13 +240,22 @@ class KananBeamSearch {
       childNodes.clear();
       childNodes.reserve(grandChildNode.length);
 
-      foreach (e; grandChildNode) {
-        childNodes ~= e;
+      grandChildNode[].sort!("a.evalValue > b.evalValue");
+
+      if (grandChildNode.length >= searchWidth) {
+        foreach (e; grandChildNode[0 .. searchWidth]) {
+          childNodes ~= e;
+        }
+      } else {
+        foreach (e; grandChildNode) {
+          childNodes ~= e;
+        }
       }
     }
   }
 }
 
+// unittest {{{
 unittest {
   import Kanan.dispField : disp;
 
@@ -239,6 +278,9 @@ unittest {
   field.color[2][3] = 2;
   field.color[3][2] = 2;
 
+  field.color[2][4] = 1;
+  field.color[1][3] = 1;
+
   field.agentNum = 2;
   field.myTeamID = 1;
   field.rivalTeamID = 2;
@@ -260,11 +302,16 @@ unittest {
   field.rivalTilePoint = 0;
   field.rivalAreaPoint = 0;
   field.maxTurn = 2;
+  field.calcTilePoint;
+  field.calcMyAreaPoint();
+  field.calcRivalAreaPoint();
 
-  auto search = new KananBeamSearch(field, 1, 3);
+  auto search = new KananBeamSearch(field, 1, 3, 100);
   search.searchAgentAction;
 
   foreach (e; search.searchFinished) {
-    e.originMoveDir.writeln;
+    e.field.disp;
+    e.evalValue.writeln;
   }
 }
+//}}}
