@@ -104,6 +104,14 @@ struct Field {
       // 自分のエージェント
       tmpAgentPos[i][0] = myAgentData[i][1] + dx[myMoveDir[i]];
       tmpAgentPos[i][1] = myAgentData[i][2] + dy[myMoveDir[i]];
+      if (tmpAgentPos[i][0] < 0 || width <= tmpAgentPos[i][0]) {
+        tmpAgentPos[i][0] = myAgentData[i][1];
+        tmpAgentPos[i][1] = myAgentData[i][2];
+      } else if (tmpAgentPos[i][1] < 0 || height <= tmpAgentPos[i][1]) {
+        tmpAgentPos[i][0] = myAgentData[i][1];
+        tmpAgentPos[i][1] = myAgentData[i][2];
+      }
+
       if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == rivalTeamID) {
         int[] tmp = [myAgentData[i][1], myAgentData[i][2]];
         tmpAgentPos ~= tmp;
@@ -111,6 +119,15 @@ struct Field {
       // 相手のエージェント
       tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1] + dx[uniform(0, 9)];
       tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2] + dx[uniform(0, 9)];
+
+      if (tmpAgentPos[i + agentNum][0] < 0 || width <= tmpAgentPos[i + agentNum][0]) {
+        tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1];
+        tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2];
+      } else if (tmpAgentPos[i + agentNum][1] < 0 || height <= tmpAgentPos[i + agentNum][1]) {
+        tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1];
+        tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2];
+      }
+
       if (color[tmpAgentPos[i + agentNum][1]][tmpAgentPos[i + agentNum][0]] == myTeamID) {
         int[] tmp = [rivalAgentData[i][1], rivalAgentData[i][2]];
         tmpAgentPos ~= tmp;
