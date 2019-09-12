@@ -33,7 +33,7 @@ struct Node {
   uint turn;
   Field field;
 
-  // 子Nodeの生成
+  // 子Nodeの生成 {{{
   S getNextNodes(int originalTurn) {
     S ret;
 
@@ -179,6 +179,7 @@ struct Node {
     }
     return ret;
   }
+  // }}}
 
   // フィールドの評価
   void evalField()
@@ -212,12 +213,14 @@ class KananBeamSearch {
   uint turn;
   Field nowFieldState;
   uint maxTurn;
+  uint searchWidth;
 
-  this(Field nowFieldState, uint turn, uint maxTurn) {
+  this(Field nowFieldState, uint turn, uint maxTurn, uint searchWidth) {
     this.childNodes = new Node(nowFieldState, turn);
     this.turn = turn;
     this.maxTurn = maxTurn;
     this.nowFieldState = nowFieldState;
+    this.searchWidth = searchWidth;
   }
 
   void searchAgentAction() {
@@ -238,8 +241,16 @@ class KananBeamSearch {
       childNodes.clear();
       childNodes.reserve(grandChildNode.length);
 
-      foreach (e; grandChildNode) {
-        childNodes ~= e;
+      grandChildNode[].sort!("a.evalValue > b.evalValue");
+
+      if (grandChildNode.length >= searchWidth) {
+        foreach (e; grandChildNode[0 .. searchWidth]) {
+          childNodes ~= e;
+        }
+      } else {
+        foreach (e; grandChildNode) {
+          childNodes ~= e;
+        }
       }
     }
   }
@@ -296,7 +307,7 @@ unittest {
   field.calcMyAreaPoint();
   field.calcRivalAreaPoint();
 
-  auto search = new KananBeamSearch(field, 1, 3);
+  auto search = new KananBeamSearch(field, 1, 3, 100);
   search.searchAgentAction;
 
   foreach (e; search.searchFinished) {
