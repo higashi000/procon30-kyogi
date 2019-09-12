@@ -240,7 +240,9 @@ class KananBeamSearch {
       childNodes.clear();
       childNodes.reserve(grandChildNode.length);
 
-      grandChildNode[].sort!("a.evalValue > b.evalValue");
+      if (grandChildNode.length > searchWidth) {
+        partialSort!("a.evalValue > b.evalValue")(grandChildNode[], searchWidth);
+      }
 
       if (grandChildNode.length >= searchWidth) {
         foreach (e; grandChildNode[0 .. searchWidth]) {
