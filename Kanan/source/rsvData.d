@@ -1,6 +1,6 @@
 module Kanan.rsvData;
 
-struct rsvMariData {
+struct rsvFieldData {
   int width;
   int height;
   int[][] point;
