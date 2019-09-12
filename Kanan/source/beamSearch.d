@@ -227,7 +227,6 @@ class KananBeamSearch {
     S grandChildNode;
 
     while(!childNodes.empty()) {
-      Thread.sleep(dur!"seconds"(1));
       grandChildNode.clear();
 
       foreach (e; childNodes) {
