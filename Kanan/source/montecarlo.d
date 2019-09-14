@@ -7,6 +7,7 @@ struct MontecarloNode {
   this(Field field, uint turn, int[] myMoveDir) {
     this.field = new Field(field, myMoveDir);
     this.turn = turn;
+    this.evalValue = result();
   }
 
   Field field;
@@ -32,6 +33,14 @@ struct MontecarloNode {
           break;
       }
     }
+  }
+
+  int result()
+  {
+    int myPoint = field.myAreaPoint + field.myTilePoint;
+    int rivalPoint = field.rivalAreaPoint + field.rivalTilePoint;
+
+    return myPoint - rivalPoint;
   }
 }
 
