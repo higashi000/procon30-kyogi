@@ -1,7 +1,9 @@
 module Kanan.montecarlo;
 
 import Kanan.field, Kanan.dispField;
-import std.random, std.stdio;
+import std.random, std.stdio, std.array;
+
+alias MontecarloS = Array!(MontecarloNode*);
 
 struct MontecarloNode {
   this(Field field, uint turn, int[] myMoveDir) {
@@ -15,9 +17,7 @@ struct MontecarloNode {
   uint evalValue;
 
   int playOut(MontecarloNode nextNode, int maxTurn) {
-    if (turn == maxTurn)  {
-      return evalValue;
-    } else {
+    if (turn != maxTurn) {
       switch (field.agentNum) {
         case 2:
           playOut(Node(field, turn + 1, [uniform(0, 9), uniform(0, 9)]), maxTurn);
@@ -32,6 +32,8 @@ struct MontecarloNode {
           playOut(Node(field, turn + 1, [uniform(0, 9), uniform(0, 9), uniform(0, 9), uniform(0, 9), uniform(0, 9)]), maxTurn);
           break;
       }
+    } else {
+      return evalValue;
     }
   }
 
