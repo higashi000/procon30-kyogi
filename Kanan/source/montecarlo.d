@@ -186,6 +186,7 @@ class Montecarlo {
 
 // unittest {{{
 unittest {
+  import std.datetime;
   Field field;
   field.width = 6;
   field.height = 6;
@@ -234,12 +235,15 @@ unittest {
   field.calcRivalAreaPoint();
 
   uint turn = 1;
-  uint maxTurn = 3;
-  uint trial = 100;
+  uint maxTurn = 10;
+  uint trial = 50000;
+
+  StopWatch sw;
+  sw.start();
   auto search = new Montecarlo(field, turn, maxTurn, trial);
   search.playGame();
-  foreach (e; search.nextNode) {
-    e.evalValue.writeln;
-  }
+  sw.stop();
+
+  sw.peek.msecs.writeln;
 }
 //}}}
