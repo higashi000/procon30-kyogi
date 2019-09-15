@@ -173,14 +173,16 @@ class Montecarlo {
     return resSum;
   }
 
-  void playGame()
+  MontecarloNode playGame()
   {
     int[] result;
     foreach (e; nextNode) {
       e.childEval = playNode(*e);
     }
 
-    partialSort!("a.childEval > b.childEval")(nextNode[], 1);
+    auto top = maxElement!("a.childEval")(nextNode[]);
+
+    return *top;
   }
 }
 
@@ -236,14 +238,14 @@ unittest {
 
   uint turn = 1;
   uint maxTurn = 10;
-  uint trial = 50000;
+  uint trial = 1000;
 
   StopWatch sw;
   sw.start();
   auto search = new Montecarlo(field, turn, maxTurn, trial);
-  search.playGame();
+  auto topNode = search.playGame();
+  topNode.childEval.writeln;
   sw.stop();
-
   sw.peek.msecs.writeln;
 }
 //}}}
