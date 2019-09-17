@@ -3,6 +3,7 @@ module Kanan.montecarlo;
 import Kanan.field, Kanan.dispField;
 import std.stdio, std.range, std.algorithm, std.array, std.string, std.math, std.conv,
        std.container, std.bigint, std.ascii, std.typecons, std.format, std.random;
+import core.thread;
 
 alias M = Array!(MontecarloNode*);
 
@@ -12,12 +13,14 @@ struct MontecarloNode {
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
+    this.thisEval = 0;
   }
   this(Field field, uint turn) {
     this.field = Field(field);
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
+    this.thisEval = 0;
   }
 
 
@@ -25,6 +28,7 @@ struct MontecarloNode {
   uint turn;
   uint evalValue;
   uint childEval;
+  int thisEval;
 
   int playOut(MontecarloNode nextNode, int maxTurn) {
     if (nextNode.turn <= maxTurn) {
@@ -47,6 +51,16 @@ struct MontecarloNode {
     }
     return nextNode.evalValue;
   }
+
+  void playNode(uint maxTurn, uint trialNum)
+  {
+    foreach (i; 0 .. trialNum) {
+      playOut(this, maxTurn);
+      thisEval += evalValue;
+    }
+  }
+
+
 
   // 子Nodeの生成 --- {{{
   M getNextNode() {
@@ -162,27 +176,41 @@ class Montecarlo {
     this.trialNum = trialNum;
   }
 
-  int playNode(MontecarloNode node)
-  {
-    int resSum = 0;
-    foreach (i; 0 .. trialNum) {
-      node.playOut(node, maxTurn);
-      resSum += node.evalValue;
-    }
-
-    return resSum;
-  }
-
   MontecarloNode playGame()
   {
-    int[] result;
+    Thread[] threads;
     foreach (e; nextNode) {
-      e.childEval = playNode(*e);
+      auto t = new MontecarloThread(e, maxTurn, trialNum);
+      threads ~= t;
+      t.start();
     }
 
-    auto top = maxElement!("a.childEval")(nextNode[]);
+    foreach (t; threads) {
+      t.join();
+    }
+
+    auto top = maxElement!("a.thisEval")(nextNode[]);
 
     return *top;
+  }
+}
+
+class MontecarloThread : Thread {
+  this(MontecarloNode* node, int maxTurn, int trialNum) {
+    this.node = node;
+    this.maxTurn = maxTurn;
+    this.trialNum = trialNum;
+
+    super(&f);
+  }
+
+  MontecarloNode* node;
+  uint maxTurn;
+  uint trialNum;
+
+  void f()
+  {
+    node.playNode(maxTurn, trialNum);
   }
 }
 
