@@ -255,6 +255,22 @@ class KananBeamSearch {
       }
     }
   }
+
+  int[][] bestAnswer()
+  {
+    int[][] answer;
+    auto topNode = maxElement!("a.evalValue")(searchFinished[]);
+
+
+    foreach (i; 0 .. field.agentNum) {
+      answer ~= [];
+      foreach (j; file.myAgentData[i]) {
+        answer[i] ~= j;
+      }
+    }
+
+    return answer;
+  }
 }
 
 // unittest {{{
