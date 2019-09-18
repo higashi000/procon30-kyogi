@@ -1,6 +1,12 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+  "github.com/gin-gonic/gin"
+  "fmt"
+  "io/ioutil"
+  "log"
+  "encoding/json"
+)
 
 type FieldData struct {
 	Width             int     `json:"width"`
@@ -29,5 +35,37 @@ type Actions struct {
   Dy int `json:"dy"`
 }
 
+
 func main() {
+  r := gin.Default()
+  field := getFieldData()
+  fmt.Println(field)
+  SendFieldData(r, field)
+  r.Run()
+}
+
+// フィールドデータの返却
+func SendFieldData(r *gin.Engine, field FieldData) {
+  r.GET("/matches/:id", func(c *gin.Context) {
+      c.JSON(200, field)
+      })
+}
+
+// jsonファイルの読み込み
+func getFieldData() FieldData {
+  // ファイルから読み取り
+  bytes, err := ioutil.ReadFile("A.json")
+
+  if err != nil {
+    log.Fatal(err)
+  }
+
+  var field FieldData
+
+    // fieldのstructに格納
+  if err := json.Unmarshal(bytes, &field); err != nil {
+    log.Fatal(err)
+  }
+
+  return field
 }
