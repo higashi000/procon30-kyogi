@@ -258,7 +258,7 @@ class KananBeamSearch {
     Actions[] answer;
     auto topNode = maxElement!("a.evalValue")(searchFinished[]);
 
-    foreach (i; 0 .. field.agentNum) {
+    foreach (i; 0 .. topNode.field.agentNum) {
       answer ~= Actions(topNode.field.myAgentData[i][0], "move", dx[topNode.originMoveDir[i]], dy[topNode.originMoveDir[i]]);
     }
 
