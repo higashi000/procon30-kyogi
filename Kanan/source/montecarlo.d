@@ -12,6 +12,10 @@ struct MontecarloNode {
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
+    this.myMoveDir = new int[field.agentNum];
+    foreach (i; 0 .. agentNum) {
+      this.myMoveDir[i] = myMoveDir[i];
+    }
   }
   this(Field field, uint turn) {
     this.field = Field(field);
@@ -25,6 +29,7 @@ struct MontecarloNode {
   uint turn;
   uint evalValue;
   uint childEval;
+  int[] myMoveDir;
 
   int playOut(MontecarloNode nextNode, int maxTurn) {
     if (nextNode.turn <= maxTurn) {
@@ -148,6 +153,8 @@ struct MontecarloNode {
 }
 
 class Montecarlo {
+  import Kanan.sendData;
+
   MontecarloNode originNode;
   M nextNode;
   uint turn;
@@ -183,6 +190,18 @@ class Montecarlo {
     auto top = maxElement!("a.childEval")(nextNode[]);
 
     return *top;
+  }
+
+  Actions[] bestAnswer()
+  {
+    Actions[] answer;
+    auto topNode = playGame();
+
+    foreach (i; 0 .. topNode.field.agentNum) {
+      answer ~= Actions(topNode.field.myAgentData[i][0], "move", dx[topNode.originMoveDir[i]], dy[topNode.originMoveDir[i]]);
+    }
+
+    return answer;
   }
 }
 
