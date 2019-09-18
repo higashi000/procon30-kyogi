@@ -202,10 +202,7 @@ struct Node {
 }
 
 class KananBeamSearch {
-  import Kanan.dispField;
-  import std.stdio;
-  import std.range : front, popFront;
-  import std.algorithm : copy;
+  import Kanan.dispField, Kanan.sendData;
 
   S childNodes;
   Node[] searchFinished;
@@ -256,17 +253,13 @@ class KananBeamSearch {
     }
   }
 
-  int[][] bestAnswer()
+  Actions[] bestAnswer()
   {
-    int[][] answer;
+    Actions[] answer;
     auto topNode = maxElement!("a.evalValue")(searchFinished[]);
 
-
     foreach (i; 0 .. field.agentNum) {
-      answer ~= [];
-      foreach (j; file.myAgentData[i]) {
-        answer[i] ~= j;
-      }
+      answer ~= Actions(topNode.field.myAgentData[i][0], "move", dx[topNode.originMoveDir[i]], dy[topNode.originMoveDir[i]]);
     }
 
     return answer;
