@@ -28,27 +28,41 @@ type FieldData struct {
 	Actions []interface{} `json:"actions"`
 }
 
-type Actions struct {
+// エージェントの行動を受け取る構造体 {{{
+type  Action struct {
   AgentID int `json:"agentID"`
-  MovePattern string `json:"type"`
+  Type string `json:"type"`
   Dx int `json:"dx"`
   Dy int `json:"dy"`
 }
 
+type Actions struct {
+  AgentActions []Action `json:"actions"`
+}
+// }}}
 
 func main() {
   r := gin.Default()
   field := getFieldData()
   fmt.Println(field)
-  SendFieldData(r, field)
+  sendFieldData(r, field)
+  rsvActionData(r)
   r.Run()
 }
 
 // フィールドデータの返却
-func SendFieldData(r *gin.Engine, field FieldData) {
+func sendFieldData(r *gin.Engine, field FieldData) {
   r.GET("/matches/:id", func(c *gin.Context) {
       c.JSON(200, field)
       })
+}
+
+func rsvActionData(r *gin.Engine) {
+  var actions Actions
+  r.POST("/matches/:id/action", func(c *gin.Context) {
+      c.BindJSON(&actions)
+      log.Print(actions)
+  })
 }
 
 // jsonファイルの読み込み
