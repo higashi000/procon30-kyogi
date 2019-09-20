@@ -1,7 +1,7 @@
 #!/bin/sh
 
 cd ./Sarah
-go run main.go &
+gnome-terminal -- go run main.go &
 cd ..
 
 cd ./Mari
@@ -14,8 +14,10 @@ read _maxTurn
 echo -n "自チームID >>"
 read _myTeamID
 
-go run main.go &
+gnome-terminal -- go run main.go $_mariIP $_mariPort $_myTeamID $_maxTurn &
 cd ..
+
+sleep 2
 
 cd ./Kanan
 dub build --compiler=ldc2 --build=release --
