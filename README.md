@@ -1,5 +1,17 @@
 # procon30-kyogi
 
-prcon30競技部門のリポジトリ
+nit-ok prcon30競技部門のリポジトリ
 
-最終更新 2019-6-18
+## Library
+- ldc2
+- gin
+
+## How to use
+- ビルド
+`sh ./build.sh`
+
+- 実行
+`sh ./start.sh`
+
+- 自作のゲームサーバーを用いての動作確認
+`sh ./test.sh`
