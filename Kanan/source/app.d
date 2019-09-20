@@ -10,11 +10,13 @@ void main(string[] args)
 
 
   while (turn <= maxTurn) {
-    auto field = connector.getFieldData().parseFieldData();
+    connector.getFieldData();
+    auto field = connector.parseFieldData();
 
     if (turn < maxTurn / 2) {
       auto beamSearch = new KananBeamSearch(field, turn, maxTurn, 9 ^^ 3);
-      auto answer = beamSearch.searchAgentAction().bestAnswer();
+      beamSearch.searchAgentAction();
+      auto answer = beamSearch.bestAnswer();
       connector.sendResult(answer);
     } else {
       auto montecarlo = new Montecarlo(field, turn, maxTurn, 1000);

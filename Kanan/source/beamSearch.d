@@ -211,6 +211,8 @@ class KananBeamSearch {
   Field nowFieldState;
   uint maxTurn;
   uint searchWidth;
+  immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
+  immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
 
   this(Field nowFieldState, uint turn, uint maxTurn, uint searchWidth) {
     this.childNodes = new Node(nowFieldState, turn);
@@ -256,10 +258,10 @@ class KananBeamSearch {
   Actions[] bestAnswer()
   {
     Actions[] answer;
-    auto topNode = maxElement!("a.evalValue")(searchFinished[]);
+    auto top = maxElement!("a.evalValue")(searchFinished[]);
 
-    foreach (i; 0 .. topNode.field.agentNum) {
-      answer ~= Actions(topNode.field.myAgentData[i][0], "move", dx[topNode.originMoveDir[i]], dy[topNode.originMoveDir[i]]);
+    foreach (i; 0 .. top.field.agentNum) {
+      answer ~= Actions(top.field.myAgentData[i][0], "move", dx[top.originMoveDir[i]], dy[top.originMoveDir[i]]);
     }
 
     return answer;

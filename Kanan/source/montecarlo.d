@@ -13,7 +13,7 @@ struct MontecarloNode {
     this.evalValue = result();
     this.childEval = 0;
     this.myMoveDir = new int[field.agentNum];
-    foreach (i; 0 .. agentNum) {
+    foreach (i; 0 .. field.agentNum) {
       this.myMoveDir[i] = myMoveDir[i];
     }
   }
@@ -33,22 +33,11 @@ struct MontecarloNode {
 
   int playOut(MontecarloNode nextNode, int maxTurn) {
     if (nextNode.turn <= maxTurn) {
-      switch (field.agentNum) {
-        case 2:
-          playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, [uniform(0, 9), uniform(0, 9)]), maxTurn);
-          break;
-        case 3:
-          playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, [uniform(0, 9), uniform(0, 9), uniform(0, 9)]), maxTurn);
-          break;
-        case 4:
-          playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, [uniform(0, 9), uniform(0, 9), uniform(0, 9), uniform(0, 9)]), maxTurn);
-          break;
-        case 5:
-          playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, [uniform(0, 9), uniform(0, 9), uniform(0, 9), uniform(0, 9), uniform(0, 9)]), maxTurn);
-          break;
-        default:
-          break;
+      int[] agentDir;
+      foreach (i; 0 .. field.agentNum) {
+        agentDir ~= uniform(0, 9);
       }
+      playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, agentDir), maxTurn);
     }
     return nextNode.evalValue;
   }
@@ -161,6 +150,9 @@ class Montecarlo {
   uint maxTurn;
   uint trialNum;
 
+  immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
+  immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
+
   this(Field nowFieldState, uint turn, uint maxTurn, uint trialNum) {
     this.originNode = MontecarloNode(nowFieldState, turn);
     this.turn = turn;
@@ -198,7 +190,7 @@ class Montecarlo {
     auto topNode = playGame();
 
     foreach (i; 0 .. topNode.field.agentNum) {
-      answer ~= Actions(topNode.field.myAgentData[i][0], "move", dx[topNode.originMoveDir[i]], dy[topNode.originMoveDir[i]]);
+      answer ~= Actions(topNode.field.myAgentData[i][0], "move", dx[topNode.myMoveDir[i]], dy[topNode.myMoveDir[i]]);
     }
 
     return answer;
