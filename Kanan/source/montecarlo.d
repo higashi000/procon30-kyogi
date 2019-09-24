@@ -149,6 +149,8 @@ struct MontecarloNode {
 
 class Montecarlo {
   import Kanan.sendData;
+  import std.datetime;
+  import core.time;
 
   MontecarloNode originNode;
   M nextNode;
@@ -181,19 +183,15 @@ class Montecarlo {
 
   MontecarloNode playGame()
   {
-    import std.datetime;
 
-    StopWatch sw;
+    auto st = Clock.currTime;
 
-    sw.start();
-    while (sw.peek.msecs <= thinkingTime) {
+    while (Clock.currTime - st <= thinkingTime.msecs) {
       foreach (e; nextNode) {
         e.evalSum += e.playOut(*e, maxTurn);
         e.cntplayOut++;
       }
     }
-
-    sw.stop();
 
     foreach (e; nextNode) {
       e.childEval = e.evalSum / e.cntplayOut;
