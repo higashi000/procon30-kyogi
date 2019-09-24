@@ -9,6 +9,18 @@ nit-ok prcon30競技部門のリポジトリ
 - ldc2
 - gin
 
+## Install
+### ldc2
+以下のコマンドでldc2をダウンロード後，PATHを通す<br>
+`curl -fsS https://dlang.org/install.sh | bash -s ldc`
+
+### golang
+以下のコマンドでインストール(go1.12じゃないと動かないかもしれない)
+`sudo snap instal --classic go`
+### gin
+以下のコマンドでインストール
+`go get -u github.com/gin-gonic/gin`
+
 ## How to use
 
 - ビルド<br>
