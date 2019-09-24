@@ -15,10 +15,10 @@ nit-ok prcon30競技部門のリポジトリ
 `curl -fsS https://dlang.org/install.sh | bash -s ldc`
 
 ### golang
-以下のコマンドでインストール(go1.12じゃないと動かないかもしれない)
+以下のコマンドでインストール(go1.12じゃないと動かないかもしれない)<br>
 `sudo snap instal --classic go`
 ### gin
-以下のコマンドでインストール
+以下のコマンドでインストール<br>
 `go get -u github.com/gin-gonic/gin`
 
 ## How to use
