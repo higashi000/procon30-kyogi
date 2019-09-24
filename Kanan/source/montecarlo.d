@@ -12,6 +12,8 @@ struct MontecarloNode {
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
+    this.evalSum = 0.0;
+    this.cntplayOut = 0;
     this.myMoveDir = new int[field.agentNum];
     foreach (i; 0 .. field.agentNum) {
       this.myMoveDir[i] = myMoveDir[i];
@@ -22,13 +24,17 @@ struct MontecarloNode {
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
+    this.evalSum = 0.0;
+    this.cntplayOut = 0;
   }
 
 
   Field field;
   uint turn;
   uint evalValue;
-  uint childEval;
+  double childEval;
+  double evalSum;
+  uint cntplayOut;
   int[] myMoveDir;
 
   int playOut(MontecarloNode nextNode, int maxTurn) {
@@ -149,16 +155,17 @@ class Montecarlo {
   uint turn;
   uint maxTurn;
   uint trialNum;
+  uint thinkingTime;
 
   immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
   immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
 
-  this(Field nowFieldState, uint turn, uint maxTurn, uint trialNum) {
+  this(Field nowFieldState, uint turn, uint maxTurn, uint thinkingTime) {
     this.originNode = MontecarloNode(nowFieldState, turn);
     this.turn = turn;
     this.maxTurn = maxTurn;
     this.nextNode = this.originNode.getNextNode();
-    this.trialNum = trialNum;
+    this.thinkingTime = thinkingTime;
   }
 
   int playNode(MontecarloNode node)
@@ -174,9 +181,22 @@ class Montecarlo {
 
   MontecarloNode playGame()
   {
-    int[] result;
+    import std.datetime;
+
+    StopWatch sw;
+
+    sw.start();
+    while (sw.peek.msecs <= thinkingTime) {
+      foreach (e; nextNode) {
+        e.evalSum += e.playOut(*e, maxTurn);
+        e.cntplayOut++;
+      }
+    }
+
+    sw.stop();
+
     foreach (e; nextNode) {
-      e.childEval = playNode(*e);
+      e.childEval = e.evalSum / e.cntplayOut;
     }
 
     auto top = maxElement!("a.childEval")(nextNode[]);
