@@ -26,12 +26,18 @@ public class Connector {
       byte[] rsvData = new byte[1000];
 
       send.write("1".getBytes("UTF-8"));
-      rsv.read(rsvData);
+      var dataLen = rsv.read(rsvData);
       rsv.close();
 
       socket.close();
 
-      fieldStr = new String(rsvData, "UTF-8");
+      byte[] necessaryBytes = new byte[dataLen];
+
+      for (int i = 0; i < dataLen; ++i) {
+        necessaryBytes[i] = rsvData[i];
+      }
+
+      fieldStr = new String(necessaryBytes, "UTF-8");
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -39,6 +45,4 @@ public class Connector {
     System.out.println(fieldStr);
     return fieldStr;
   }
-
-
 }
