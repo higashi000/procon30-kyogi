@@ -13,7 +13,7 @@ public class Connector {
     this.port = port;
   }
 
-  public static String getFieldData() {
+  public static FieldData getFieldData() {
     String fieldStr = "";
     try {
       // ローカルサーバーに接続
@@ -49,7 +49,7 @@ public class Connector {
       e.printStackTrace();
     }
 
-    return fieldStr;
+    return parseRsvData(fieldStr);
   }
 
   public static  void sendResult(Action[] actions) {
@@ -83,9 +83,9 @@ public class Connector {
   }
 
   // 受け取ったデータをparseしてFieldDataに格納して返す
-  public  static FieldData parseRsvData() {
+  public  static FieldData parseRsvData(String fieldStr) {
 
-    var parseStr = getFieldData().split("\n", 0);
+    var parseStr = fieldStr.split("\n", 0);
 
     var tmpParseData = parseStr[0].split(" ", 0);
 
