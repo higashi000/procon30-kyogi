@@ -1,13 +1,7 @@
-import java.awt.print.PrinterGraphics;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.net.Socket;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.Socket;
 
 public class Connector {
 
