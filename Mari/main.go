@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
   "net"
+  "bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -92,41 +93,44 @@ func sendResultData(conn net.Conn, port string, matchID string, rsvData string) 
 
   parseData := strings.Split(rsvData, ";")
 
-  sendMoveInform := make([]Actions, len(parseData) - 1)
-
+  sendMoveInform := `{"actions":[`
   for i := 0; i < len(parseData) - 1; i++ {
     agentData := strings.Split(parseData[i], " ")
-    sendMoveInform[i].AgentID, _ = strconv.Atoi(agentData[0])
-    sendMoveInform[i].MovePattern = agentData[1]
-    sendMoveInform[i].Dx, _ = strconv.Atoi(agentData[2])
-    sendMoveInform[i].Dy, _ = strconv.Atoi(agentData[3])
+    sendMoveInform += `{"agentID":` + agentData[0] + "," + `"dx":` + agentData[2] + "," + `"dy":` + agentData[3] + "," + `"type":` + `"` + agentData[1] + `"` + "}"
+    if i < len(parseData) - 2 {
+      sendMoveInform += ","
+    }
   }
+  sendMoveInform += `]}`
 
-  proocon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "action"
+  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
   procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest(
-    "GET",
-    proocon30RequestUrl,
-    nil,
+    "POST",
+    procon30RequestUrl,
+    bytes.NewBuffer([]byte(sendMoveInform)),
   )
   if err != nil {
     fmt.Println("error")
     return
   }
   req.Header.Set("Authorization", procon30Token)
-  req.Header.Add("Content-Type", "application/json")
+  req.Header.Set("Content-Type", "application/json")
 
-  client := new(http.Client)
+  client := &http.Client{}
   resp, err := client.Do(req)
+
+  fmt.Println(resp);
+
   defer resp.Body.Close()
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
-  proocon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID
+  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID
   procon30Token := "procon30_example_token"
 
-  req, err := http.NewRequest("GET", proocon30RequestUrl, nil)
+  req, err := http.NewRequest("GET", procon30RequestUrl, nil)
   if err != nil {
     fmt.Println("error")
     return
