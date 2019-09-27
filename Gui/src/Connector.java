@@ -33,8 +33,6 @@ public class Connector {
 
       // ローカルサーバーにフィールドデータの要求
       send.write("1".getBytes("UTF-8"));
-      // 送信用ストリームを閉じる
-      send.close();
 
       // フィールドデータのbyte配列の受取とその長さの受取
       var dataLen = rsv.read(rsvData);
