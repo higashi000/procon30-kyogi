@@ -88,8 +88,8 @@ struct Field {
   bool[][] rivalAreaPointFlg;
 
   // 移動方向
-  immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
-  immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
+  int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
+  int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
 
 
 // エージェントの移動 {{{

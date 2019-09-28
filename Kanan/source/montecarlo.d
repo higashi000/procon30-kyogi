@@ -12,38 +12,38 @@ struct MontecarloNode {
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
+    this.evalSum = 0.0;
+    this.cntplayOut = 0;
+    this.myMoveDir = new int[field.agentNum];
+    foreach (i; 0 .. field.agentNum) {
+      this.myMoveDir[i] = myMoveDir[i];
+    }
   }
   this(Field field, uint turn) {
     this.field = Field(field);
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
+    this.evalSum = 0.0;
+    this.cntplayOut = 0;
   }
 
 
   Field field;
   uint turn;
   uint evalValue;
-  uint childEval;
+  double childEval;
+  double evalSum;
+  uint cntplayOut;
+  int[] myMoveDir;
 
   int playOut(MontecarloNode nextNode, int maxTurn) {
     if (nextNode.turn <= maxTurn) {
-      switch (field.agentNum) {
-        case 2:
-          playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, [uniform(0, 9), uniform(0, 9)]), maxTurn);
-          break;
-        case 3:
-          playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, [uniform(0, 9), uniform(0, 9), uniform(0, 9)]), maxTurn);
-          break;
-        case 4:
-          playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, [uniform(0, 9), uniform(0, 9), uniform(0, 9), uniform(0, 9)]), maxTurn);
-          break;
-        case 5:
-          playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, [uniform(0, 9), uniform(0, 9), uniform(0, 9), uniform(0, 9), uniform(0, 9)]), maxTurn);
-          break;
-        default:
-          break;
+      int[] agentDir;
+      foreach (i; 0 .. field.agentNum) {
+        agentDir ~= uniform(0, 9);
       }
+      playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, agentDir), maxTurn);
     }
     return nextNode.evalValue;
   }
@@ -148,18 +148,26 @@ struct MontecarloNode {
 }
 
 class Montecarlo {
+  import Kanan.sendData;
+  import std.datetime;
+  import core.time;
+
   MontecarloNode originNode;
   M nextNode;
   uint turn;
   uint maxTurn;
   uint trialNum;
+  uint thinkingTime;
 
-  this(Field nowFieldState, uint turn, uint maxTurn, uint trialNum) {
+  immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
+  immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
+
+  this(Field nowFieldState, uint turn, uint maxTurn, uint thinkingTime) {
     this.originNode = MontecarloNode(nowFieldState, turn);
     this.turn = turn;
     this.maxTurn = maxTurn;
     this.nextNode = this.originNode.getNextNode();
-    this.trialNum = trialNum;
+    this.thinkingTime = thinkingTime;
   }
 
   int playNode(MontecarloNode node)
@@ -175,14 +183,35 @@ class Montecarlo {
 
   MontecarloNode playGame()
   {
-    int[] result;
+
+    auto st = Clock.currTime;
+
+    while (Clock.currTime - st <= thinkingTime.msecs) {
+      foreach (e; nextNode) {
+        e.evalSum += e.playOut(*e, maxTurn);
+        e.cntplayOut++;
+      }
+    }
+
     foreach (e; nextNode) {
-      e.childEval = playNode(*e);
+      e.childEval = e.evalSum / e.cntplayOut;
     }
 
     auto top = maxElement!("a.childEval")(nextNode[]);
 
     return *top;
+  }
+
+  Actions[] bestAnswer()
+  {
+    Actions[] answer;
+    auto topNode = playGame();
+
+    foreach (i; 0 .. topNode.field.agentNum) {
+      answer ~= Actions(topNode.field.myAgentData[i][0], "move", dx[topNode.myMoveDir[i]], dy[topNode.myMoveDir[i]]);
+    }
+
+    return answer;
   }
 }
 
