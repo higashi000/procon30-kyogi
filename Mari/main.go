@@ -33,13 +33,6 @@ type FieldData struct {
 	Actions []interface{} `json:"actions"`
 }
 
-type Actions struct {
-  AgentID int `json:"agentID"`
-  MovePattern string `json:"type"`
-  Dx int `json:"dx"`
-  Dy int `json:"dy"`
-}
-
 var myTeamID int
 var maxTurn string
 
@@ -151,7 +144,7 @@ func sendAgentActions() {
   // そのうち書く
 }
 
-// JsonをsolverとGUIに送るために変換
+// JsonをsolverとGUIに送るために変換 {{{
 func convertJsonToSendData() string {
   var fieldData FieldData
 
@@ -247,3 +240,4 @@ func convertJsonToSendData() string {
 
   return convertData
 }
+//}}}
