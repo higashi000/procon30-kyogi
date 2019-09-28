@@ -55,12 +55,12 @@ func main() {
   defer listener.Close()
 
   for {
-    connectClient(listener)
-    go connectClient(listener)
+    connectClient(listener, args[4])
+    go connectClient(listener, args[4])
   }
 }
 
-func connectClient(listener net.Listener) {
+func connectClient(listener net.Listener, serverPORT string) {
   conn, err := listener.Accept()
 
   if err != nil {
@@ -78,7 +78,7 @@ func connectClient(listener net.Listener) {
     case "1" :
       conn.Write([]byte(convertJsonToSendData()))
     case "2" :
-      sendResultData(conn, "8080", "1", string(rsvData[2:n]))
+      sendResultData(conn, serverPORT, "1", string(rsvData[2:n]))
   }
 }
 
@@ -137,11 +137,6 @@ func requestFieldData(matchID string, port string, rsvData *[]byte) {
   rsvFieldData, _ := ioutil.ReadAll(resp.Body)
 
   *rsvData = rsvFieldData
-}
-
-func sendAgentActions() {
-  // エージェントの行動送るやつ
-  // そのうち書く
 }
 
 // JsonをsolverとGUIに送るために変換 {{{
