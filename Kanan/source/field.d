@@ -39,7 +39,8 @@ struct Field {
     }
     this.rivalTeamID = field.rivalTeamID;
 
-    moveAgent();
+    moveMyAgent();
+    moveRivlAgent();
     calcTilePoint();
     calcMyAreaPoint();
     calcRivalAreaPoint();
@@ -93,11 +94,11 @@ struct Field {
 
 
 // エージェントの移動 {{{
-  void moveAgent()
+  void moveMyAgent()
   {
     import std.random : uniform;
     import std.stdio : writeln;
-    int[][] tmpAgentPos = new int[][](agentNum * 2, 2);
+    int[][] tmpAgentPos = new int[][](agentNum, 2);
 
     // 現時点での移動先設定
     foreach (i; 0 .. agentNum) {
@@ -116,28 +117,10 @@ struct Field {
         int[] tmp = [myAgentData[i][1], myAgentData[i][2]];
         tmpAgentPos ~= tmp;
       }
-      // 相手のエージェント
-      tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1] + dx[uniform(0, 9)];
-      tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2] + dx[uniform(0, 9)];
-
-      if (tmpAgentPos[i + agentNum][0] < 0 || width <= tmpAgentPos[i + agentNum][0]) {
-        tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1];
-        tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2];
-      } else if (tmpAgentPos[i + agentNum][1] < 0 || height <= tmpAgentPos[i + agentNum][1]) {
-        tmpAgentPos[i + agentNum][0] = rivalAgentData[i][1];
-        tmpAgentPos[i + agentNum][1] = rivalAgentData[i][2];
-      }
-
-      if (color[tmpAgentPos[i + agentNum][1]][tmpAgentPos[i + agentNum][0]] == myTeamID) {
-        int[] tmp = [rivalAgentData[i][1], rivalAgentData[i][2]];
-        tmpAgentPos ~= tmp;
-      }
     }
 
     checkDuplicate(true, tmpAgentPos);
     checkDuplicate(true, tmpAgentPos);
-    checkDuplicate(false, tmpAgentPos);
-    checkDuplicate(false, tmpAgentPos);
 
 // エージェントがフィルード外に行かないようにする --- {{{
     foreach (i; 0 .. agentNum) {
@@ -147,15 +130,6 @@ struct Field {
       } else if ((tmpAgentPos[i][1] < 0) || (height <= tmpAgentPos[i][1])) {
         tmpAgentPos[i][0] = myAgentData[i][1];
         tmpAgentPos[i][1] = myAgentData[i][2];
-      }
-    }
-    foreach (i; agentNum .. agentNum * 2) {
-      if ((tmpAgentPos[i][0] < 0) || (width <= tmpAgentPos[i][0])) {
-        tmpAgentPos[i][0] = rivalAgentData[i - agentNum][1];
-        tmpAgentPos[i][1] = rivalAgentData[i - agentNum][2];
-      } else if ((tmpAgentPos[i][1] < 0) || (height <= tmpAgentPos[i][1])) {
-        tmpAgentPos[i][0] = rivalAgentData[i - agentNum][1];
-        tmpAgentPos[i][1] = rivalAgentData[i - agentNum][2];
       }
     }
 // }}}
@@ -169,16 +143,60 @@ struct Field {
         color[myAgentData[i][2]][myAgentData[i][1]] = myTeamID;
       }
     }
+  }
+
+  void moveRivlAgent()
+  {
+    import std.random : uniform;
+    import std.stdio : writeln;
+    int[][] tmpAgentPos = new int[][](agentNum, 2);
+
+    // 現時点での移動先設定
     foreach (i; 0 .. agentNum) {
-      if (color[tmpAgentPos[i + agentNum][1]][tmpAgentPos[i + agentNum][0]] == myTeamID) {
-        color[tmpAgentPos[i + agentNum][1]][tmpAgentPos[i + agentNum][0]] = 0;
+      // 自分のエージェント
+      tmpAgentPos[i][0] = rivalAgentData[i][1] + dx[uniform(1, 9)];
+      tmpAgentPos[i][1] = rivalAgentData[i][2] + dy[uniform(1, 9)];
+      if (tmpAgentPos[i][0] < 0 || width <= tmpAgentPos[i][0]) {
+        tmpAgentPos[i][0] = rivalAgentData[i][1];
+        tmpAgentPos[i][1] = rivalAgentData[i][2];
+      } else if (tmpAgentPos[i][1] < 0 || height <= tmpAgentPos[i][1]) {
+        tmpAgentPos[i][0] = rivalAgentData[i][1];
+        tmpAgentPos[i][1] = rivalAgentData[i][2];
+      }
+
+      if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == myTeamID) {
+        int[] tmp = [rivalAgentData[i][1], rivalAgentData[i][2]];
+        tmpAgentPos ~= tmp;
+      }
+    }
+
+    checkDuplicate(false, tmpAgentPos);
+    checkDuplicate(false, tmpAgentPos);
+
+// エージェントがフィルード外に行かないようにする --- {{{
+    foreach (i; 0 .. agentNum) {
+      if ((tmpAgentPos[i][0] < 0) || (width <= tmpAgentPos[i][0])) {
+        tmpAgentPos[i][0] = rivalAgentData[i][1];
+        tmpAgentPos[i][1] = rivalAgentData[i][2];
+      } else if ((tmpAgentPos[i][1] < 0) || (height <= tmpAgentPos[i][1])) {
+        tmpAgentPos[i][0] = rivalAgentData[i][1];
+        tmpAgentPos[i][1] = rivalAgentData[i][2];
+      }
+    }
+// }}}
+
+    foreach (i; 0 .. agentNum) {
+      if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == myTeamID) {
+        color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] = 0;
       } else {
-        rivalAgentData[i][1] = tmpAgentPos[i + agentNum][0];
-        rivalAgentData[i][2] = tmpAgentPos[i + agentNum][1];
+        rivalAgentData[i][1] = tmpAgentPos[i][0];
+        rivalAgentData[i][2] = tmpAgentPos[i][1];
         color[rivalAgentData[i][2]][rivalAgentData[i][1]] = rivalTeamID;
       }
     }
   }
+
+
 
   // 移動先の重複確認
   // 重複があった場合は元の場所に戻す
@@ -193,9 +211,6 @@ struct Field {
             if (j < agentNum) {
               tmpAgentPos[j][0] = myAgentData[j][1];
               tmpAgentPos[j][1] = myAgentData[j][2];
-            } else if (agentNum <= j && j < agentNum * 2){
-              tmpAgentPos[j][0] = rivalAgentData[j - agentNum][1];
-              tmpAgentPos[j][1] = rivalAgentData[j - agentNum][2];
             }
           }
         }
@@ -203,17 +218,13 @@ struct Field {
     } else {
       foreach (i; 0 .. agentNum) {
         foreach (j; 0 .. tmpAgentPos.length) {
-          int nowTmpPos = i + agentNum;
-          if ((nowTmpPos != j) && (tmpAgentPos[nowTmpPos] == tmpAgentPos[j])) {
-            tmpAgentPos[nowTmpPos][0] = rivalAgentData[i][1];
-            tmpAgentPos[nowTmpPos][1] = rivalAgentData[i][2];
+          if ((i != j) && (tmpAgentPos[i] == tmpAgentPos[j])) {
+            tmpAgentPos[i][0] = rivalAgentData[i][1];
+            tmpAgentPos[i][1] = rivalAgentData[i][2];
 
             if (j < agentNum) {
-              tmpAgentPos[j][0] = myAgentData[j][1];
-              tmpAgentPos[j][1] = myAgentData[j][2];
-            } else if (agentNum <= j && j < agentNum * 2){
-              tmpAgentPos[j][0] = rivalAgentData[j - agentNum][1];
-              tmpAgentPos[j][1] = rivalAgentData[j - agentNum][2];
+              tmpAgentPos[j][0] = rivalAgentData[j][1];
+              tmpAgentPos[j][1] = rivalAgentData[j][2];
             }
           }
         }
