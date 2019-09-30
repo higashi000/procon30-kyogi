@@ -53,37 +53,32 @@ public class Connector {
   }
 
   public static  void sendResult(Action[] actions) {
-    boolean doneConnect = false;
+    try {
+      // ローカルサーバーに接続する用
+      Socket socket = new Socket(ip, port);
 
-    while (!doneConnect) {
-      try {
-        // ローカルサーバーに接続する用
-        Socket socket = new Socket(ip, port);
+      // 受取，送信用のストリーム
+      InputStream rsv = socket.getInputStream();
+      OutputStream send = socket.getOutputStream();
 
-        // 受取，送信用のストリーム
-        InputStream rsv = socket.getInputStream();
-        OutputStream send = socket.getOutputStream();
-
-        // 送信用文字列
-        String sendData = "2g ";
-        for (int i = 0; i < actions.length; ++i) {
-          sendData += String.valueOf(actions[i].agentID);
-          sendData += " ";
-          sendData += actions[i].type;
-          sendData += " ";
-          sendData += String.valueOf(actions[i].dx);
-          sendData += " ";
-          sendData += String.valueOf(actions[i].dy);
-          sendData += ";";
-        }
-
-        // 回答を送信
-        send.write(sendData.getBytes("UTF-8"));
-        socket.close();
-        doneConnect = true;
-      } catch (IOException e) {
-        e.printStackTrace();
+      // 送信用文字列
+      String sendData = "2g ";
+      for (int i = 0; i < actions.length; ++i) {
+        sendData += String.valueOf(actions[i].agentID);
+        sendData += " ";
+        sendData += actions[i].type;
+        sendData += " ";
+        sendData += String.valueOf(actions[i].dx);
+        sendData += " ";
+        sendData += String.valueOf(actions[i].dy);
+        sendData += ";";
       }
+
+      // 回答を送信
+      send.write(sendData.getBytes("UTF-8"));
+      socket.close();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
