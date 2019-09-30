@@ -26,7 +26,7 @@ public class Connector {
       byte[] rsvData = new byte[1000];
 
       // ローカルサーバーにフィールドデータの要求
-      send.write("1".getBytes("UTF-8"));
+      send.write("1f".getBytes("UTF-8"));
 
       // フィールドデータのbyte配列の受取とその長さの受取
       var dataLen = rsv.read(rsvData);
@@ -53,32 +53,37 @@ public class Connector {
   }
 
   public static  void sendResult(Action[] actions) {
-    try {
-      // ローカルサーバーに接続する用
-      Socket socket = new Socket(ip, port);
+    boolean doneConnect = false;
 
-      // 受取，送信用のストリーム
-      InputStream rsv = socket.getInputStream();
-      OutputStream send = socket.getOutputStream();
+    while (!doneConnect) {
+      try {
+        // ローカルサーバーに接続する用
+        Socket socket = new Socket(ip, port);
 
-      // 送信用文字列
-      String sendData = "2 ";
-      for (int i = 0; i < actions.length; ++i) {
-        sendData += String.valueOf(actions[i].agentID);
-        sendData += " ";
-        sendData += actions[i].type;
-        sendData += " ";
-        sendData += String.valueOf(actions[i].dx);
-        sendData += " ";
-        sendData += String.valueOf(actions[i].dy);
-        sendData += ";";
+        // 受取，送信用のストリーム
+        InputStream rsv = socket.getInputStream();
+        OutputStream send = socket.getOutputStream();
+
+        // 送信用文字列
+        String sendData = "2g ";
+        for (int i = 0; i < actions.length; ++i) {
+          sendData += String.valueOf(actions[i].agentID);
+          sendData += " ";
+          sendData += actions[i].type;
+          sendData += " ";
+          sendData += String.valueOf(actions[i].dx);
+          sendData += " ";
+          sendData += String.valueOf(actions[i].dy);
+          sendData += ";";
+        }
+
+        // 回答を送信
+        send.write(sendData.getBytes("UTF-8"));
+        socket.close();
+        doneConnect = true;
+      } catch (IOException e) {
+        e.printStackTrace();
       }
-
-      // 回答を送信
-      send.write(sendData.getBytes("UTF-8"));
-      socket.close();
-    } catch (IOException e) {
-      e.printStackTrace();
     }
   }
 
@@ -91,8 +96,8 @@ public class Connector {
 
     // width, height, agentNumをFieldDataに入れる
     FieldData afterParse = new FieldData(Integer.parseInt(tmpParseData[0]),
-                                         Integer.parseInt(tmpParseData[1]),
-                                         Integer.parseInt(parseStr[5]));
+        Integer.parseInt(tmpParseData[1]),
+        Integer.parseInt(parseStr[5]));
 
     // フィールドのポイント
     tmpParseData = parseStr[1].split(";", 0);
