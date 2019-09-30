@@ -26,7 +26,7 @@ public class Connector {
       byte[] rsvData = new byte[1000];
 
       // ローカルサーバーにフィールドデータの要求
-      send.write("1".getBytes("UTF-8"));
+      send.write("1f".getBytes("UTF-8"));
 
       // フィールドデータのbyte配列の受取とその長さの受取
       var dataLen = rsv.read(rsvData);
@@ -62,7 +62,7 @@ public class Connector {
       OutputStream send = socket.getOutputStream();
 
       // 送信用文字列
-      String sendData = "2 ";
+      String sendData = "2g ";
       for (int i = 0; i < actions.length; ++i) {
         sendData += String.valueOf(actions[i].agentID);
         sendData += " ";
@@ -91,8 +91,8 @@ public class Connector {
 
     // width, height, agentNumをFieldDataに入れる
     FieldData afterParse = new FieldData(Integer.parseInt(tmpParseData[0]),
-                                         Integer.parseInt(tmpParseData[1]),
-                                         Integer.parseInt(parseStr[5]));
+        Integer.parseInt(tmpParseData[1]),
+        Integer.parseInt(parseStr[5]));
 
     // フィールドのポイント
     tmpParseData = parseStr[1].split(";", 0);
