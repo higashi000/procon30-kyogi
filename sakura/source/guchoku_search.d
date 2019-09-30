@@ -1,4 +1,4 @@
-module beamsearch;
+module guchoku_search;
 
 import std.conv;
 import std.range;
