@@ -119,6 +119,7 @@ func rsvSolverData(cntConect *int, rsvData string, port string, answer *[]Action
   fmt.Println(*cntConect)
   if *cntConect >= 2 {
     sendResult(*answer, *otherAnswer, port, "1")
+    *cntConect = 0;
   }
 }
 
