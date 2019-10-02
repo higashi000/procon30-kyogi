@@ -7,7 +7,8 @@ import std.stdio, std.range, std.algorithm, std.array, std.string, std.math, std
 alias M = Array!(MontecarloNode*);
 
 struct MontecarloNode {
-  this(Field field, uint turn, int[] myMoveDir) {
+  this(Field field, uint turn, int[] myMoveDir, uint nextNodeWidth) {
+    this.nextNodeWidth = nextNodeWidth;
     this.field = Field(field, myMoveDir);
     this.turn = turn;
     this.evalValue = result();
@@ -19,7 +20,9 @@ struct MontecarloNode {
       this.myMoveDir[i] = myMoveDir[i];
     }
   }
-  this(Field field, uint turn) {
+  this(Field field, uint turn, uint nextNodeWidth) {
+    this.nextNodeWidth = nextNodeWidth;
+    this.field = Field(field, myMoveDir);
     this.field = Field(field);
     this.turn = turn;
     this.evalValue = result();
@@ -36,6 +39,7 @@ struct MontecarloNode {
   double evalSum;
   uint cntplayOut;
   int[] myMoveDir;
+  uint nextNodeWidth;
 
   int playOut(MontecarloNode nextNode, int maxTurn) {
     if (nextNode.turn <= maxTurn) {
@@ -43,7 +47,7 @@ struct MontecarloNode {
       foreach (i; 0 .. field.agentNum) {
         agentDir ~= uniform(0, 9);
       }
-      playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, agentDir), maxTurn);
+      playOut(MontecarloNode(nextNode.field, nextNode.turn + 1, agentDir, nextNodeWidth), maxTurn);
     }
     return nextNode.evalValue;
   }
@@ -65,6 +69,7 @@ struct MontecarloNode {
         ret ~= nextNode5();
         break;
       default:
+        ret ~= nextNodeMore6();
         break;
     }
 
@@ -77,7 +82,7 @@ struct MontecarloNode {
 
     foreach (i; 0 .. 9) {
       foreach (j; 0 .. 9) {
-        tmp = new MontecarloNode(field, turn + 1, [i, j]);
+        tmp = new MontecarloNode(field, turn + 1, [i, j], nextNodeWidth);
         ret ~= tmp;
       }
     }
@@ -91,7 +96,7 @@ struct MontecarloNode {
     foreach (i; 0 .. 9) {
       foreach (j; 0 .. 9) {
         foreach (k; 0 .. 9) {
-          tmp = new MontecarloNode(field, turn + 1, [i, j, k]);
+          tmp = new MontecarloNode(field, turn + 1, [i, j, k], nextNodeWidth);
           ret ~= tmp;
         }
       }
@@ -107,7 +112,7 @@ struct MontecarloNode {
       foreach (j; 0 .. 9) {
         foreach (k; 0 .. 9) {
           foreach (l; 0 .. 9) {
-            tmp = new MontecarloNode(field, turn + 1, [i, j, k, l]);
+            tmp = new MontecarloNode(field, turn + 1, [i, j, k, l], nextNodeWidth);
             ret ~= tmp;
           }
         }
@@ -126,12 +131,28 @@ struct MontecarloNode {
         foreach (k; 0 .. 9) {
           foreach (l; 0 .. 9) {
             foreach (m; 0 .. 9) {
-              tmp = new MontecarloNode(field, turn + 1, [i, j, k, l, m]);
+              tmp = new MontecarloNode(field, turn + 1, [i, j, k, l, m], nextNodeWidth);
               ret ~= tmp;
             }
           }
         }
       }
+    }
+
+    return ret;
+  }
+
+  M nextNodeMore6() {
+    M ret;
+    MontecarloNode* tmp;
+
+    foreach (i; 0 .. nextNodeWidth) {
+      int[] tmpMoveDir;
+      foreach (j; 0 .. field.agentNum) {
+        tmpMoveDir ~= uniform(0, 9);
+      }
+      tmp = new MontecarloNode(field, turn + 1, tmpMoveDir, nextNodeWidth);
+      ret ~= tmp;
     }
 
     return ret;
@@ -162,8 +183,8 @@ class Montecarlo {
   immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
   immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
 
-  this(Field nowFieldState, uint turn, uint maxTurn, uint thinkingTime) {
-    this.originNode = MontecarloNode(nowFieldState, turn);
+  this(Field nowFieldState, uint turn, uint maxTurn, uint thinkingTime, uint nextNodeWidth) {
+    this.originNode = MontecarloNode(nowFieldState, turn, nextNodeWidth);
     this.turn = turn;
     this.maxTurn = maxTurn;
     this.nextNode = this.originNode.getNextNode();

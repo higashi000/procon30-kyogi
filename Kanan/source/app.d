@@ -20,7 +20,7 @@ void main(string[] args)
       auto answer = beamSearch.bestAnswer();
       connector.sendResult(answer);
     } else {
-      auto montecarlo = new Montecarlo(field, turn, maxTurn, 4500);
+      auto montecarlo = new Montecarlo(field, turn, maxTurn, 4500, 20);
       auto answer = montecarlo.bestAnswer();
 
       connector.sendResult(answer);
