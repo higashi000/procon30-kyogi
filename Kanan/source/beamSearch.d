@@ -10,8 +10,9 @@ alias S = Array!(Node*);
 struct Node {
   import std.random : uniform;
   import Kanan.dispField;
-  this(Field field, uint turn, int[] myMoveDir, int[] originMoveDir) {
+  this(Field field, uint turn, int[] myMoveDir, int[] originMoveDir, uint nextNodeWidth) {
     this.field = Field(field, myMoveDir);
+    this.nextNodeWidth = nextNodeWidth;
     this.turn = turn;
     this.evalValue = 0;
     this.originMoveDir = new int[originMoveDir.length];
@@ -20,8 +21,9 @@ struct Node {
     }
   }
 
-  this(Field field, uint turn) {
+  this(Field field, uint turn, uint nextNodeWidth) {
     this.field = Field(field);
+    this.nextNodeWidth = nextNodeWidth;
     this.turn = turn;
     this.evalValue = 0;
   }
@@ -29,6 +31,7 @@ struct Node {
   S childNodes;
   int[] originMoveDir;
 
+  uint nextNodeWidth;
   int evalValue;
   uint turn;
   Field field;
@@ -51,16 +54,15 @@ struct Node {
         case 5:
           ret ~= nextNode5(true);
           break;
-          // エージェントの人数が6人以上の場合，探索幅が大きすぎるので別途実装が必要
-          /* case 6: */
-          /*   ret ~= nextNode6(); */
-          /*   break; */
-          /* case 7: */
-          /*   ret ~= nextNode7(); */
-          /*   break; */
-          /* case 8: */
-          /*   ret ~= nextNode8(); */
-          /*   break; */
+        case 6:
+          ret ~= nextNodeMore6(true);
+          break;
+        case 7:
+          ret ~= nextNodeMore6(true);
+          break;
+        case 8:
+          ret ~= nextNodeMore6(true);
+          break;
         default:
           break;
       }
@@ -78,16 +80,15 @@ struct Node {
         case 5:
           ret ~= nextNode5(false);
           break;
-          // エージェントの人数が6人以上の場合，探索幅が大きすぎるので別途実装が必要
-          /* case 6: */
-          /*   ret ~= nextNode6(); */
-          /*   break; */
-          /* case 7: */
-          /*   ret ~= nextNode7(); */
-          /*   break; */
-          /* case 8: */
-          /*   ret ~= nextNode8(); */
-          /*   break; */
+          case 6:
+            ret ~= nextNodeMore6(false);
+            break;
+          case 7:
+            ret ~= nextNodeMore6(false);
+            break;
+          case 8:
+            ret ~= nextNodeMore6(false);
+            break;
         default:
           break;
       }
@@ -104,9 +105,9 @@ struct Node {
       foreach (j; 0 .. 9) {
         // 今のNodeが根本のNodeなら動きを渡す
         if (originalTurn)
-          tmp = new Node(field, turn + 1, [i, j], [i, j]);
+          tmp = new Node(field, turn + 1, [i, j], [i, j], nextNodeWidth);
         else
-          tmp = new Node(field, turn + 1, [i, j], originMoveDir);
+          tmp = new Node(field, turn + 1, [i, j], originMoveDir, nextNodeWidth);
         tmp.evalField();
         ret ~= tmp;
       }
@@ -123,9 +124,9 @@ struct Node {
         foreach (k; 0 .. 9) {
           // 今のNodeが根本のNodeなら動きを渡す
           if (originalTurn)
-            tmp = new Node(field, turn + 1, [i, j, k], [i, j, k]);
+            tmp = new Node(field, turn + 1, [i, j, k], [i, j, k], nextNodeWidth);
           else
-            tmp = new Node(field, turn + 1, [i, j, k], originMoveDir);
+            tmp = new Node(field, turn + 1, [i, j, k], originMoveDir, nextNodeWidth);
           tmp.evalField();
           ret ~= tmp;
         }
@@ -144,9 +145,9 @@ struct Node {
           foreach (l; 0 .. 9) {
             // 今のNodeが根本のNodeなら動きを渡す
             if (originalTurn)
-              tmp = new Node(field, turn + 1, [i, j, k, l], [i, j, k, l]);
+              tmp = new Node(field, turn + 1, [i, j, k, l], [i, j, k, l], nextNodeWidth);
             else
-              tmp = new Node(field, turn + 1, [i, j, k, l], originMoveDir);
+              tmp = new Node(field, turn + 1, [i, j, k, l], originMoveDir, nextNodeWidth);
             tmp.evalField();
             ret ~= tmp;
           }
@@ -167,9 +168,9 @@ struct Node {
             foreach (m; 0 .. 9) {
               // 今のNodeが根本のNodeなら動きを渡す
               if (originalTurn)
-                tmp = new Node(field, turn + 1, [i, j, k, l, m], [i, j, k, l, m]);
+                tmp = new Node(field, turn + 1, [i, j, k, l, m], [i, j, k, l, m], nextNodeWidth);
               else
-                tmp = new Node(field, turn + 1, [i, j, k, l, m], originMoveDir);
+                tmp = new Node(field, turn + 1, [i, j, k, l, m], originMoveDir, nextNodeWidth);
               tmp.evalField();
               ret ~= tmp;
             }
@@ -177,6 +178,31 @@ struct Node {
         }
       }
     }
+    return ret;
+  }
+
+  // エージェントが6人以上の場合のNode生成
+  S nextNodeMore6(bool originalTurn)
+  {
+    import std.random;
+    S ret;
+
+    Node* tmp;
+
+    foreach (i; 0 .. nextNodeWidth) {
+      int[] tmpMoveDir;
+      foreach (j; 0 .. field.agentNum) {
+        tmpMoveDir ~= uniform(0, 9);
+      }
+      if (originalTurn)
+        tmp = new Node(field, turn + 1, tmpMoveDir, tmpMoveDir, nextNodeWidth);
+      else
+        tmp = new Node(field, turn + 1, tmpMoveDir, originMoveDir, nextNodeWidth);
+
+      tmp.evalField();
+      ret ~= tmp;
+    }
+
     return ret;
   }
   // }}}
@@ -214,8 +240,8 @@ class KananBeamSearch {
   immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
   immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
 
-  this(Field nowFieldState, uint turn, uint maxTurn, uint searchWidth) {
-    this.childNodes = new Node(nowFieldState, turn);
+  this(Field nowFieldState, uint turn, uint maxTurn, uint searchWidth, uint nextNodeWidth) {
+    this.childNodes = new Node(nowFieldState, turn, nextNodeWidth);
     this.turn = turn;
     this.maxTurn = maxTurn;
     this.nowFieldState = nowFieldState;
