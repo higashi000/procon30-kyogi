@@ -1,6 +1,8 @@
 import std.stdio;
 
+import sakura.hipts_search;
+
 void main()
 {
-	writeln("Edit source/app.d to start your project.");
+  opencsv();
 }
