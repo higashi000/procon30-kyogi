@@ -89,8 +89,10 @@ func connectClient(listener net.Listener, serverPORT string, cntConect *int, sol
     fmt.Println("error")
   }
   switch string(rsvData[0:2]) {
-    case "1f" :
+    case "sf" :
       conn.Write([]byte(convertJsonToSendData()))
+    case "gf" :
+      conn.Write([]byte(convertJsonToSendDataForGUI()))
     case "2s" :
       rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT, solverAnswer, guiAnswer)
     case "2g" :
@@ -212,7 +214,130 @@ func requestFieldData(matchID string, port string, rsvData *[]byte) {
   *rsvData = rsvFieldData
 }
 
-// JsonをsolverとGUIに送るために変換 {{{
+func checkArea(field FieldData, teamID int) [][]bool {
+  dx := [9]int{0, -1, -1, 0, 1, 1, 1, 0, -1}
+  dy := [9]int{0, 0, -1, -1, -1, 0, 1, 1, 1}
+  var fl [][]bool
+
+  for i := 0; i < field.Height; i++ {
+    tmp := []bool{}
+    fl = append(fl, tmp)
+    for j := 0; j < field.Width; j++ {
+      fl[i] = append(fl[i], false)
+    }
+  }
+
+  for i := 1; i < field.Height - 1; i++ {
+    startArea := false
+    var startPos int
+
+    for j := 1; j < field.Width - 1; j++ {
+      myTile := 0;
+
+      for k := 1; k < 9; k += 2 {
+        if field.Tiled[i + dy[k]][j + dx[k]] == teamID || fl[i + dy[k]][j + dx[k]] {
+          if field.Tiled[i][j] != teamID {
+            myTile += 1
+          }
+        }
+      }
+
+      if myTile > 1 {
+        fl[i][j] = true
+        if !startArea {
+          startArea = true
+          startPos = j
+        }
+      }
+
+      if field.Tiled[i][j] == teamID && startArea {
+        startArea = false
+        startPos = j + 1
+      }
+
+      if myTile < 2 && startArea {
+        for k := startPos; k < j + 1; k++ {
+          fl[i][k] = false
+        }
+        startArea = false
+      }
+    }
+  }
+
+
+  for i := field.Height - 2; i > 0; i-- {
+    for j := field.Width - 2; j > 0; j-- {
+      myTile := 0
+
+      for k := 1; k < 9; k += 2 {
+        if field.Tiled[i + dy[k]][j + dx[k]] == teamID || fl[i + dy[k]][j + dx[k]] {
+          if field.Tiled[i][j] != 1 {
+            myTile++
+          }
+        }
+      }
+      if myTile < 4 {
+        fl[i][j] = false
+      }
+    }
+  }
+
+  areaPoint := 0
+
+  for i := 0; i < field.Height; i++ {
+    for j := 0; j < field.Width; j++ {
+      if fl[i][j] {
+        if field.Points[i][j] < 0 {
+          areaPoint += field.Points[i][j] * -1
+        } else {
+          areaPoint += field.Points[i][j]
+        }
+      }
+    }
+  }
+
+  return fl
+}
+
+func integrationArea(field FieldData) [][]int {
+  var areaPoint [][]int
+
+  for i := 0; i < field.Height; i++ {
+    tmp := []int{}
+    areaPoint = append(areaPoint, tmp)
+    for j := 0; j < field.Width; j++ {
+      areaPoint[i] = append(areaPoint[i], 0)
+    }
+  }
+
+  var rivalArea [][]bool
+  myArea := checkArea(field, myTeamID)
+  if field.Teams[0].TeamID == myTeamID {
+    rivalArea = checkArea(field, field.Teams[1].TeamID)
+  } else {
+    rivalArea = checkArea(field, field.Teams[1].TeamID)
+  }
+
+  for i := 0; i < field.Height; i++ {
+    for j := 0; j < field.Width; j++ {
+      if myArea[i][j] && rivalArea[i][j] {
+        areaPoint[i][j] = 3
+      } else if !myArea[i][j] && rivalArea[i][j] {
+        areaPoint[i][j] = 2
+      } else if myArea[i][j] && !rivalArea[i][j] {
+        areaPoint[i][j] = 1
+      }
+    }
+  }
+
+  for i := 0; i < field.Height; i++ {
+    fmt.Println(areaPoint[i])
+  }
+
+  return areaPoint
+}
+
+// Jsonをsolverに送るために変換 {{{
 func convertJsonToSendData() string {
   var fieldData FieldData
 
@@ -305,6 +430,121 @@ func convertJsonToSendData() string {
     }
   }
   convertData += maxTurn + "\n"
+
+  return convertData
+}
+//}}}
+// JsonをGUIに送るために変換 {{{
+func convertJsonToSendDataForGUI() string {
+  var fieldData FieldData
+
+  var rsvData []byte
+
+  requestFieldData("1", "8080", &rsvData)
+
+  fmt.Println("aaa");
+  if err := json.Unmarshal(rsvData, &fieldData); err != nil {
+    log.Fatal(err)
+  }
+
+  area := integrationArea(fieldData)
+
+
+  var convertData string
+
+  convertData += strconv.Itoa(fieldData.Width)
+  convertData += " "
+
+  convertData += strconv.Itoa(fieldData.Height)
+  convertData += "\n"
+
+  for i := 0; i < fieldData.Height; i++ {
+    for j := 0; j < fieldData.Width; j++ {
+      convertData += strconv.Itoa(fieldData.Points[i][j])
+      if j != fieldData.Width - 1 {
+        convertData += " "
+      }
+    }
+    convertData += ";"
+  }
+  convertData += "\n"
+
+  convertData += strconv.Itoa(fieldData.StartedAtUnixTime)
+  convertData += "\n"
+
+  convertData += strconv.Itoa(fieldData.Turn)
+  convertData += "\n"
+
+  for i := 0; i < fieldData.Height; i++ {
+    for j := 0; j < fieldData.Width; j++ {
+      convertData += strconv.Itoa(fieldData.Tiled[i][j])
+      if j != fieldData.Width - 1 {
+        convertData += " "
+      }
+    }
+    convertData += ";"
+  }
+  convertData += "\n"
+
+  convertData += strconv.Itoa(len(fieldData.Teams[0].Agents))
+  convertData += "\n"
+
+  if fieldData.Teams[0].TeamID == myTeamID {
+    for i := 0; i < 2; i++ {
+      convertData += strconv.Itoa(fieldData.Teams[i].TeamID)
+      convertData += "\n"
+
+      for j := 0; j < len(fieldData.Teams[i].Agents); j++ {
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].AgentID)
+        convertData += " "
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X)
+        convertData += " "
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y)
+        convertData += ";"
+      }
+      convertData += "\n"
+
+      convertData += strconv.Itoa(fieldData.Teams[i].TilePoint)
+      convertData += " "
+      convertData += strconv.Itoa(fieldData.Teams[i].AreaPoint)
+      convertData += "\n"
+    }
+  } else {
+    for i := 1; i >= 0; i-- {
+      convertData += strconv.Itoa(fieldData.Teams[i].TeamID)
+      convertData += "\n"
+
+      for j := 0; j < len(fieldData.Teams[i].Agents); j++ {
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].AgentID)
+        convertData += " "
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X)
+        convertData += " "
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y)
+        convertData += ";"
+      }
+      convertData += "\n"
+
+      convertData += strconv.Itoa(fieldData.Teams[i].TilePoint)
+      convertData += " "
+      convertData += strconv.Itoa(fieldData.Teams[i].AreaPoint)
+      convertData += "\n"
+    }
+  }
+  convertData += maxTurn + "\n"
+
+  fmt.Println("aaa")
+  for i := 0; i < fieldData.Height; i++ {
+    for j := 0; j < fieldData.Width; j++ {
+      convertData += strconv.Itoa(area[i][j])
+      if j != fieldData.Width - 1 {
+        convertData += " "
+      }
+    }
+    convertData += ";"
+  }
+  convertData += "\n"
+
+  fmt.Println(convertData)
 
   return convertData
 }
