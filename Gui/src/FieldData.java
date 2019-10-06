@@ -17,6 +17,7 @@ public class FieldData {
     this.rivalAreaPoint = 0;
     this.maxTurn = 0;
     this.turn = 0;
+    this.area = new int[height][width];
   }
   int width;
   int height;
@@ -34,4 +35,5 @@ public class FieldData {
   int rivalAreaPoint;
   int maxTurn;
   int turn;
+  int[][] area;
 }
