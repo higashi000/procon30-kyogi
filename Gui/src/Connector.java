@@ -26,7 +26,7 @@ public class Connector {
       byte[] rsvData = new byte[1000];
 
       // ローカルサーバーにフィールドデータの要求
-      send.write("1f".getBytes("UTF-8"));
+      send.write("gf".getBytes("UTF-8"));
 
       // フィールドデータのbyte配列の受取とその長さの受取
       var dataLen = rsv.read(rsvData);
@@ -36,7 +36,8 @@ public class Connector {
       // ソケットを閉じる
       socket.close();
 
-      byte[] necessaryBytes = new byte[dataLen];
+      byte[] necessaryBytes;
+      necessaryBytes = new byte[dataLen];
 
       // rsvDataの後ろについてる何も入ってない部分の削除
       for (int i = 0; i < dataLen; ++i) {
@@ -145,6 +146,15 @@ public class Connector {
 
     // 最大ターン数
     afterParse.maxTurn = Integer.parseInt(parseStr[12]);
+
+
+    tmpParseData = parseStr[13].split(";", 0);
+    for (int i = 0; i < afterParse.height; ++i) {
+      var tmp = tmpParseData[i].split(" ", 0);
+      for (int j = 0; j < afterParse.width; ++j) {
+        afterParse.area[i][j] = Integer.parseInt((tmp[j]));
+      }
+    }
 
     return afterParse;
   }
