@@ -6,37 +6,7 @@ import std.stdio;
 import std.file;
 import std.container;
 
-int range_begin = 0, range_end = 0;
-int[20][20] eval;
-int w, h;
-
-void opencsv(){
-  // ファイル名を拡張子無しで打ち込みひらく
-  auto file_head = readln.split[0].to!string;
-  string evl = readText(file_head ~ ".csv");
-
-  // 仮にフィールドが width = 10 , hight = 10 とする
-  w = 10;
-  h = 10;
-
-  // 評価値を配列に格納する
-  for (int i = 0; i < w; i++){
-    for (int j = 0; j < h; j++){
-      while (evl[range_end] != ',') range_end++;
-      eval[i][j] = to!(int)(evl[range_begin..range_end]);
-      range_begin = ++range_end;
-    }
-  }
-
-  for (int i = 0; i < w; i++){
-    for (int j = 0; j < h; j++){
-      writef ("%4d", eval[i][j]);
-    }
-    writeln();
-  }
-}
-
-string guchoku_search(){
+string guchoku_search(int[20][20] eval){
 
   write ("ageNum : ");
   auto ageNum = readln.split[0].to!(int);
@@ -70,7 +40,7 @@ string guchoku_search(){
         break;
 
         case 2:
-        if (posi_w == w || posi_h == 1) branch[i] = -250;
+        if (posi_w == 10 || posi_h == 1) branch[i] = -250;
         else branch[i] = eval[posi_h - 2][posi_w];
         break;
 
@@ -84,22 +54,22 @@ string guchoku_search(){
         break;
 
         case 5:
-        if (posi_w == w) branch[i] = -250;
+        if (posi_w == 10) branch[i] = -250;
         else branch[i] = eval[posi_h - 1][posi_w];
         break;
 
         case 6:
-        if (posi_w == 1 || posi_h == h) branch[i] = -250;
+        if (posi_w == 1 || posi_h == 10) branch[i] = -250;
         else branch[i] = eval[posi_h][posi_w - 2];
         break;
 
         case 7:
-        if (posi_h == h) branch[i] = -250;
+        if (posi_h == 10) branch[i] = -250;
         else branch[i] = eval[posi_h][posi_w - 1];
         break;
 
         case 8:
-        if (posi_w == w || posi_h == h) branch[i] = -250;
+        if (posi_w == 10 || posi_h == 10) branch[i] = -250;
         else branch[i] = eval[posi_h][posi_w];
         break;
 
