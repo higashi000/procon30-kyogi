@@ -11,10 +11,11 @@ string guchoku_search(int[20][20] eval){
   write ("ageNum : ");
   auto ageNum = readln.split[0].to!(int);
   string way;
-  int[10] age_x;
-  int[10] age_y;
+  int[10] age_x, age_y;
+  int w = 10, h = 10;
 
   for (int i = 0; i < ageNum; i++){
+
     writef ("myAgent_%d_x : ", i + 1);
     age_x[i] = readln.split[0].to!(int);
 
@@ -27,6 +28,7 @@ string guchoku_search(int[20][20] eval){
   foreach(e;0..ageNum){
     int posi_w = age_x[e];
     int posi_h = age_y[e];
+
     for (int i = 0; i < 9; i++){
       switch (i){
         case 0:
@@ -40,7 +42,7 @@ string guchoku_search(int[20][20] eval){
         break;
 
         case 2:
-        if (posi_w == 10 || posi_h == 1) branch[i] = -250;
+        if (posi_w == w || posi_h == 1) branch[i] = -250;
         else branch[i] = eval[posi_h - 2][posi_w];
         break;
 
@@ -54,22 +56,22 @@ string guchoku_search(int[20][20] eval){
         break;
 
         case 5:
-        if (posi_w == 10) branch[i] = -250;
+        if (posi_w == w) branch[i] = -250;
         else branch[i] = eval[posi_h - 1][posi_w];
         break;
 
         case 6:
-        if (posi_w == 1 || posi_h == 10) branch[i] = -250;
+        if (posi_w == 1 || posi_h == h) branch[i] = -250;
         else branch[i] = eval[posi_h][posi_w - 2];
         break;
 
         case 7:
-        if (posi_h == 10) branch[i] = -250;
+        if (posi_h == h) branch[i] = -250;
         else branch[i] = eval[posi_h][posi_w - 1];
         break;
 
         case 8:
-        if (posi_w == 10 || posi_h == 10) branch[i] = -250;
+        if (posi_w == w || posi_h == h) branch[i] = -250;
         else branch[i] = eval[posi_h][posi_w];
         break;
 
@@ -78,15 +80,11 @@ string guchoku_search(int[20][20] eval){
     }
   }
 
-  foreach (e;0..ageNum){
+  foreach (i; 0..ageNum){
     int answer = 4;
-    for (int i = 0; i < 9; i++){
-      if (branch[i] > branch[answer]){
-        answer = i;
-      }
+    foreach(j; 0..9) if (branch[j] > branch[answer]) answer = j;
+    if (i != 0) way ~= ",";
+    way ~="myAgent_" ~ (i + 1).to!string ~ "_" ~ (answer + 1).to!string;
     }
-    if (e != 0) way ~= ",";
-    way ~="myAgent_" ~ (e + 1).to!string ~ "_" ~ (answer + 1).to!string;
-  }
   return (way);
 }
