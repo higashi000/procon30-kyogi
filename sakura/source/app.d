@@ -1,9 +1,9 @@
 import std.stdio;
 
-import sakura.hipts_search;
+import sakura.guchoku_search;
 
 void main()
 {
   opencsv();
-  hipts_search();
+  string ans = guchoku_search();
 }
