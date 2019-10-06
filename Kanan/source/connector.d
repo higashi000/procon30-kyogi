@@ -30,7 +30,7 @@ class KananConnector {
   {
     auto socket = new TcpSocket(new InternetAddress(ip, port));
 
-    socket.send("1f");
+    socket.send("sf");
 
     ubyte[4018] rsvData;
     ulong size = socket.receive(rsvData);
