@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
   "net"
+  "bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -32,11 +33,11 @@ type FieldData struct {
 	Actions []interface{} `json:"actions"`
 }
 
-type Actions struct {
-  AgentID int `json:"agentID"`
-  MovePattern string `json:"type"`
-  Dx int `json:"dx"`
-  Dy int `json:"dy"`
+type Action struct {
+  AgentID int
+  Type string
+  Dx int
+  Dy int
 }
 
 var myTeamID int
@@ -45,6 +46,10 @@ var maxTurn string
 func main() {
   flag.Parse()
   args := flag.Args()
+
+  var cntConect int;
+  solverAnswer := make([]Action, 0)
+  guiAnswer := make([]Action, 0)
 
   myTeamID, _ = strconv.Atoi(args[2])
   maxTurn = args[3]
@@ -60,14 +65,17 @@ func main() {
   }
   defer listener.Close()
 
+  cntConect = 0
+
   for {
-    connectClient(listener)
-    go connectClient(listener)
+    connectClient(listener, args[4], &cntConect, &solverAnswer, &guiAnswer)
+    go connectClient(listener, args[4], &cntConect, &solverAnswer, &guiAnswer)
   }
 }
 
-func connectClient(listener net.Listener) {
+func connectClient(listener net.Listener, serverPORT string, cntConect *int, solverAnswer *[]Action, guiAnswer *[]Action) {
   conn, err := listener.Accept()
+
 
   if err != nil {
     fmt.Println("error")
@@ -80,53 +88,115 @@ func connectClient(listener net.Listener) {
   if err != nil {
     fmt.Println("error")
   }
-  switch string(rsvData[0]) {
-    case "1" :
+  switch string(rsvData[0:2]) {
+    case "1f" :
       conn.Write([]byte(convertJsonToSendData()))
-    case "2" :
-      sendResultData(conn, "8080", "1", string(rsvData[2:n]))
+    case "2s" :
+      rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT, solverAnswer, guiAnswer)
+    case "2g" :
+      rsvGUIData(cntConect, string(rsvData[3:n]), serverPORT, guiAnswer, solverAnswer)
+
   }
 }
 
-func sendResultData(conn net.Conn, port string, matchID string, rsvData string) {
+func rsvSolverData(cntConect *int, rsvData string, port string, answer *[]Action, otherAnswer *[]Action) {
 
   parseData := strings.Split(rsvData, ";")
 
-  sendMoveInform := make([]Actions, len(parseData) - 1)
+  for i := 0; i < len(parseData) - 1; i++ {
+    agentData := strings.Split(parseData[i], " ")
+
+    agentID, _ := strconv.Atoi(agentData[0])
+    moveType := agentData[1]
+    dx, _ := strconv.Atoi(agentData[2])
+    dy, _ := strconv.Atoi(agentData[3])
+
+    *answer = append(*answer, Action{agentID, moveType, dx, dy})
+  }
+
+  *cntConect++
+
+  fmt.Println(*cntConect)
+  if *cntConect >= 2 {
+    sendResult(*answer, *otherAnswer, port, "1")
+    *cntConect = 0;
+  }
+}
+
+func rsvGUIData(cntConect *int, rsvData string, port string, answer *[]Action, otherAnswer *[]Action) {
+
+  parseData := strings.Split(rsvData, ";")
 
   for i := 0; i < len(parseData) - 1; i++ {
     agentData := strings.Split(parseData[i], " ")
-    sendMoveInform[i].AgentID, _ = strconv.Atoi(agentData[0])
-    sendMoveInform[i].MovePattern = agentData[1]
-    sendMoveInform[i].Dx, _ = strconv.Atoi(agentData[2])
-    sendMoveInform[i].Dy, _ = strconv.Atoi(agentData[3])
+
+    agentID, _ := strconv.Atoi(agentData[0])
+    moveType := agentData[1]
+    dx, _ := strconv.Atoi(agentData[2])
+    dy, _ := strconv.Atoi(agentData[3])
+
+    *answer = append(*answer, Action{agentID, moveType, dx, dy})
   }
 
-  proocon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "action"
+  *cntConect++
+
+  fmt.Println(*cntConect)
+  if *cntConect >= 2 {
+    sendResult(*otherAnswer, *answer, port, "1")
+    *cntConect = 0;
+  }
+}
+
+func sendResult(solverAnswer []Action, guiAnswer []Action, port string, matchID string) {
+  for i := 0; i < len(guiAnswer); i++ {
+    for j := 0; j < len(solverAnswer); j++ {
+      if solverAnswer[j].AgentID == guiAnswer[i].AgentID {
+        solverAnswer[j].Type = guiAnswer[i].Type
+        solverAnswer[j].Dx = guiAnswer[i].Dx
+        solverAnswer[j].Dy = guiAnswer[i].Dy
+        continue;
+      }
+    }
+  }
+
+  sendMoveInform := `{"actions":[`
+  for i := 0; i < len(solverAnswer); i++ {
+    sendMoveInform += `{"agentID":` + strconv.Itoa(solverAnswer[i].AgentID) + "," + `"type":"` + solverAnswer[i].Type + `",` + `"dx":` + strconv.Itoa(solverAnswer[i].Dx) + "," + `"dy":` + strconv.Itoa(solverAnswer[i].Dy) + "}"
+    if i < len(solverAnswer) - 1 {
+      sendMoveInform += ","
+    }
+  }
+  sendMoveInform += `]}`
+
+  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
   procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest(
-    "GET",
-    proocon30RequestUrl,
-    nil,
+    "POST",
+    procon30RequestUrl,
+    bytes.NewBuffer([]byte(sendMoveInform)),
   )
+
   if err != nil {
     fmt.Println("error")
     return
   }
   req.Header.Set("Authorization", procon30Token)
-  req.Header.Add("Content-Type", "application/json")
+  req.Header.Set("Content-Type", "application/json")
 
-  client := new(http.Client)
+  client := &http.Client{}
   resp, err := client.Do(req)
+
+  fmt.Println(resp);
+
   defer resp.Body.Close()
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
-  proocon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID
+  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID
   procon30Token := "procon30_example_token"
 
-  req, err := http.NewRequest("GET", proocon30RequestUrl, nil)
+  req, err := http.NewRequest("GET", procon30RequestUrl, nil)
   if err != nil {
     fmt.Println("error")
     return
@@ -142,12 +212,7 @@ func requestFieldData(matchID string, port string, rsvData *[]byte) {
   *rsvData = rsvFieldData
 }
 
-func sendAgentActions() {
-  // エージェントの行動送るやつ
-  // そのうち書く
-}
-
-// JsonをsolverとGUIに送るために変換
+// JsonをsolverとGUIに送るために変換 {{{
 func convertJsonToSendData() string {
   var fieldData FieldData
 
@@ -243,3 +308,4 @@ func convertJsonToSendData() string {
 
   return convertData
 }
+//}}}
