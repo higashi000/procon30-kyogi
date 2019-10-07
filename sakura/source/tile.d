@@ -1,8 +1,8 @@
-module Sakura.tile;
+module sakura.tile;
 
 struct Tile {
   import Sakura.agent;
-  import Sakura.color;
+  import sakura.color;
 
   Agent agent = Agent.Null;
   Color color = Color.White;

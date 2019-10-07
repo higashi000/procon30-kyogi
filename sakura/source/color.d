@@ -1,4 +1,4 @@
-module Sakura.color;
+module sakura.color;
 
 enum Color {
   White,
