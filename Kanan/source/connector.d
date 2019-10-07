@@ -100,8 +100,8 @@ class KananConnector {
     foreach (i; 0 .. parseRsvData.agentNum) {
       auto agentData = (parseData[7].split(";"))[i];
       parseRsvData.myAgentData[i][0] = (agentData.split)[0].to!int;
-      parseRsvData.myAgentData[i][1] = (agentData.split)[1].to!int;
-      parseRsvData.myAgentData[i][2] = (agentData.split)[2].to!int;
+      parseRsvData.myAgentData[i][1] = (agentData.split)[1].to!int - 1;
+      parseRsvData.myAgentData[i][2] = (agentData.split)[2].to!int - 1;
     }
     parseRsvData.myTilePoint = (parseData[8].split)[0].to!int;
     parseRsvData.myAreaPoint = (parseData[8].split)[1].to!int;
@@ -111,8 +111,8 @@ class KananConnector {
     foreach (i; 0 .. parseRsvData.agentNum) {
       auto agentData = (parseData[10].split(";"))[i];
       parseRsvData.rivalAgentData[i][0] = (agentData.split)[0].to!int;
-      parseRsvData.rivalAgentData[i][1] = (agentData.split)[1].to!int;
-      parseRsvData.rivalAgentData[i][2] = (agentData.split)[2].to!int;
+      parseRsvData.rivalAgentData[i][1] = (agentData.split)[1].to!int - 1;
+      parseRsvData.rivalAgentData[i][2] = (agentData.split)[2].to!int - 1;
     }
     parseRsvData.rivalTilePoint = (parseData[11].split)[0].to!int;
     parseRsvData.rivalAreaPoint = (parseData[11].split)[1].to!int;
