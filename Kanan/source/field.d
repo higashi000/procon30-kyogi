@@ -101,9 +101,6 @@ struct Field {
       foreach (i; 0 .. agentNum) {
         tmpAgentPos[i][0] = myAgentData[i][1] + dx[dir[i]];
         tmpAgentPos[i][1] = myAgentData[i][2] + dy[dir[i]];
-        writeln(dx[dir[i]]);
-        writeln(dy[dir[i]]);
-        writeln(tmpAgentPos[i]);
 
         if (tmpAgentPos[i][0] < 0 || width <= tmpAgentPos[i][0]) {
           tmpAgentPos[i][0] = myAgentData[i][1];
