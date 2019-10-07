@@ -82,6 +82,12 @@ func rsvActionData(r *gin.Engine, field *FieldData) {
   var actions Actions
   r.POST("/matches/:id/action", func(c *gin.Context) {
       c.BindJSON(&actions)
+      for i := 0; i < len(field.Teams[0].Agents); i++ {
+        field.Teams[0].Agents[i].X = field.Teams[0].Agents[i].X - 1
+        field.Teams[0].Agents[i].Y = field.Teams[0].Agents[i].Y - 1
+        field.Teams[1].Agents[i].X = field.Teams[1].Agents[i].X - 1
+        field.Teams[1].Agents[i].Y = field.Teams[1].Agents[i].Y - 1
+      }
       updateFieldData(field, actions)
   })
 }
@@ -133,8 +139,6 @@ func updateFieldData(field *FieldData, action Actions) {
     tmpPos[i] = []int{0, 0}
   }
 
-  fmt.Println(tmpPos)
-
   for i := 0; i < agentNum; i++ {
     tmpPos[i][0] = field.Teams[0].Agents[i].X + action.AgentActions[i].Dx
     tmpPos[i][1] = field.Teams[0].Agents[i].Y + action.AgentActions[i].Dy
@@ -160,11 +164,11 @@ func updateFieldData(field *FieldData, action Actions) {
     tmpPos[i + agentNum][1] = field.Teams[1].Agents[i].Y + dy[rand.Intn(9)]
 
     if tmpPos[i + agentNum][0] < 0 || field.Width <= tmpPos[i + agentNum][0] {
-      tmpPos[i + agentNum][0] = field.Teams[1].Agents[i + agentNum].X
-      tmpPos[i + agentNum][1] = field.Teams[1].Agents[i + agentNum].Y
+      tmpPos[i + agentNum][0] = field.Teams[1].Agents[i].X
+      tmpPos[i + agentNum][1] = field.Teams[1].Agents[i].Y
     } else if tmpPos[i][1] < 0 || field.Height <= tmpPos[i][1] {
-      tmpPos[i + agentNum][0] = field.Teams[1].Agents[i + agentNum].X
-      tmpPos[i + agentNum][1] = field.Teams[1].Agents[i + agentNum].Y
+      tmpPos[i + agentNum][0] = field.Teams[1].Agents[i].X
+      tmpPos[i + agentNum][1] = field.Teams[1].Agents[i].Y
     }
 
     if field.Tiled[tmpPos[i + agentNum][1]][tmpPos[i + agentNum][0]] == field.Teams[0].TeamID {
@@ -191,9 +195,9 @@ func updateFieldData(field *FieldData, action Actions) {
     if field.Tiled[tmpPos[i + agentNum][1]][tmpPos[i + agentNum][0]] == field.Teams[0].TeamID {
       field.Tiled[tmpPos[i + agentNum][1]][tmpPos[i + agentNum][0]] = 0
     } else {
-      field.Teams[1].Agents[i + agentNum].X = tmpPos[i + agentNum][0]
-      field.Teams[1].Agents[i + agentNum].Y = tmpPos[i + agentNum][1]
-      field.Tiled[field.Teams[1].Agents[i + agentNum].Y][field.Teams[1].Agents[i + agentNum].X] = field.Teams[1].TeamID
+      field.Teams[1].Agents[i].X = tmpPos[i + agentNum][0]
+      field.Teams[1].Agents[i].Y = tmpPos[i + agentNum][1]
+      field.Tiled[field.Teams[1].Agents[i].Y][field.Teams[1].Agents[i].X] = field.Teams[1].TeamID
     }
   }
 }
