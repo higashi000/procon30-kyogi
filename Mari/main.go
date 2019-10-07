@@ -396,9 +396,9 @@ func convertJsonToSendData() string {
       for j := 0; j < len(fieldData.Teams[i].Agents); j++ {
         convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].AgentID)
         convertData += " "
-        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X)
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X - 1)
         convertData += " "
-        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y)
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y - 1)
         convertData += ";"
       }
       convertData += "\n"
@@ -416,9 +416,9 @@ func convertJsonToSendData() string {
       for j := 0; j < len(fieldData.Teams[i].Agents); j++ {
         convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].AgentID)
         convertData += " "
-        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X)
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].X - 1)
         convertData += " "
-        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y)
+        convertData += strconv.Itoa(fieldData.Teams[i].Agents[j].Y - 1)
         convertData += ";"
       }
       convertData += "\n"
