@@ -10,11 +10,12 @@ alias S = Array!(Node*);
 struct Node {
   import std.random : uniform;
   import Kanan.dispField;
-  this(Field field, uint turn, int[] myMoveDir, int[] originMoveDir, uint nextNodeWidth) {
+  this(Field field, Node* parentNode, uint turn, int[] myMoveDir, int[] originMoveDir, uint nextNodeWidth) {
     this.field = Field(field, myMoveDir, turn % 2 != 0 ? true : false);
     this.nextNodeWidth = nextNodeWidth;
     this.turn = turn;
     this.evalValue = 0;
+    this.parentNode = parentNode;
     this.originMoveDir = new int[originMoveDir.length];
     foreach (i; 0 .. originMoveDir.length) {
       this.originMoveDir[i] = originMoveDir[i];
@@ -29,6 +30,7 @@ struct Node {
   }
 
   S childNodes;
+  Node* parentNode;
   int[] originMoveDir;
 
   uint nextNodeWidth;
@@ -105,9 +107,9 @@ struct Node {
       foreach (j; 0 .. 9) {
         // 今のNodeが根本のNodeなら動きを渡す
         if (originalTurn)
-          tmp = new Node(field, turn + 1, [i, j], [i, j], nextNodeWidth);
+          tmp = new Node(field, &this, turn + 1, [i, j], [i, j], nextNodeWidth);
         else
-          tmp = new Node(field, turn + 1, [i, j], originMoveDir, nextNodeWidth);
+          tmp = new Node(field, &this, turn + 1, [i, j], originMoveDir, nextNodeWidth);
         tmp.evalField();
         ret ~= tmp;
       }
@@ -124,9 +126,9 @@ struct Node {
         foreach (k; 0 .. 9) {
           // 今のNodeが根本のNodeなら動きを渡す
           if (originalTurn)
-            tmp = new Node(field, turn + 1, [i, j, k], [i, j, k], nextNodeWidth);
+            tmp = new Node(field, &this, turn + 1, [i, j, k], [i, j, k], nextNodeWidth);
           else
-            tmp = new Node(field, turn + 1, [i, j, k], originMoveDir, nextNodeWidth);
+            tmp = new Node(field, &this, turn + 1, [i, j, k], originMoveDir, nextNodeWidth);
           tmp.evalField();
           ret ~= tmp;
         }
@@ -145,9 +147,9 @@ struct Node {
           foreach (l; 0 .. 9) {
             // 今のNodeが根本のNodeなら動きを渡す
             if (originalTurn)
-              tmp = new Node(field, turn + 1, [i, j, k, l], [i, j, k, l], nextNodeWidth);
+              tmp = new Node(field, &this, turn + 1, [i, j, k, l], [i, j, k, l], nextNodeWidth);
             else
-              tmp = new Node(field, turn + 1, [i, j, k, l], originMoveDir, nextNodeWidth);
+              tmp = new Node(field, &this, turn + 1, [i, j, k, l], originMoveDir, nextNodeWidth);
             tmp.evalField();
             ret ~= tmp;
           }
@@ -168,9 +170,9 @@ struct Node {
             foreach (m; 0 .. 9) {
               // 今のNodeが根本のNodeなら動きを渡す
               if (originalTurn)
-                tmp = new Node(field, turn + 1, [i, j, k, l, m], [i, j, k, l, m], nextNodeWidth);
+                tmp = new Node(field, &this, turn + 1, [i, j, k, l, m], [i, j, k, l, m], nextNodeWidth);
               else
-                tmp = new Node(field, turn + 1, [i, j, k, l, m], originMoveDir, nextNodeWidth);
+                tmp = new Node(field, &this, turn + 1, [i, j, k, l, m], originMoveDir, nextNodeWidth);
               tmp.evalField();
               ret ~= tmp;
             }
@@ -195,9 +197,9 @@ struct Node {
         tmpMoveDir ~= uniform(0, 9);
       }
       if (originalTurn)
-        tmp = new Node(field, turn + 1, tmpMoveDir, tmpMoveDir, nextNodeWidth);
+        tmp = new Node(field, &this, turn + 1, tmpMoveDir, tmpMoveDir, nextNodeWidth);
       else
-        tmp = new Node(field, turn + 1, tmpMoveDir, originMoveDir, nextNodeWidth);
+        tmp = new Node(field, &this, turn + 1, tmpMoveDir, originMoveDir, nextNodeWidth);
 
       tmp.evalField();
       ret ~= tmp;
@@ -237,15 +239,17 @@ class KananBeamSearch {
   Field nowFieldState;
   uint maxTurn;
   uint searchWidth;
+  uint remainingTurn;
   immutable int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
   immutable int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
 
   this(Field nowFieldState, uint turn, uint maxTurn, uint searchWidth, uint nextNodeWidth) {
-    this.childNodes = new Node(nowFieldState, turn, nextNodeWidth);
+    this.childNodes = new Node(nowFieldState, 1, nextNodeWidth);
     this.turn = turn;
     this.maxTurn = maxTurn;
     this.nowFieldState = nowFieldState;
     this.searchWidth = searchWidth;
+    this.remainingTurn = (maxTurn - turn) * 2;
   }
 
   void searchAgentAction() {
@@ -258,16 +262,15 @@ class KananBeamSearch {
         if (e.turn == maxTurn) {
           searchFinished ~= *e;
         } else {
-          grandChildNode ~= e.getNextNodes(turn);
+          grandChildNode ~= e.getNextNodes(1);
         }
       }
 
       childNodes.clear();
       childNodes.reserve(grandChildNode.length);
 
-      if (grandChildNode.length > searchWidth) {
+      if (grandChildNode.length > searchWidth)
         partialSort!("a.evalValue > b.evalValue")(grandChildNode[], searchWidth);
-      }
 
       if (grandChildNode.length >= searchWidth) {
         foreach (e; grandChildNode[0 .. searchWidth]) {
