@@ -11,7 +11,7 @@ alias MCTSN = Array!(MCTSNode*);
 struct MontecarloNode {
   this(Field field, uint turn, int[] myMoveDir, uint nextNodeWidth) {
     this.nextNodeWidth = nextNodeWidth;
-    this.field = Field(field, myMoveDir);
+    this.field = Field(field, myMoveDir, turn % 2 != 0 ? true : false);
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
@@ -24,7 +24,7 @@ struct MontecarloNode {
   }
   this(Field field, uint turn, uint nextNodeWidth) {
     this.nextNodeWidth = nextNodeWidth;
-    this.field = Field(field, myMoveDir);
+    this.field = Field(field, myMoveDir, turn % 2 != 0 ? true : false);
     this.field = Field(field);
     this.turn = turn;
     this.evalValue = result();
@@ -174,7 +174,7 @@ struct MontecarloNode {
 // MCTS用のNode {{{
 struct MCTSNode {
   this(Field field, MCTSNode* parentNode, uint turn, int[] myMoveDir, uint nextNodeWidth) {
-    this.field = Field(field, myMoveDir);
+    this.field = Field(field, myMoveDir, turn % 2 != 0 ? true : false);
     this.parentNode = parentNode;
     this.turn = turn;
     this.cntPlayOut = 0;

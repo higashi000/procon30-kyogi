@@ -11,7 +11,7 @@ struct Node {
   import std.random : uniform;
   import Kanan.dispField;
   this(Field field, uint turn, int[] myMoveDir, int[] originMoveDir, uint nextNodeWidth) {
-    this.field = Field(field, myMoveDir);
+    this.field = Field(field, myMoveDir, turn % 2 != 0 ? true : false);
     this.nextNodeWidth = nextNodeWidth;
     this.turn = turn;
     this.evalValue = 0;
