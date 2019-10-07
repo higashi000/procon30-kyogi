@@ -11,7 +11,7 @@ struct Node {
   import std.random : uniform;
   import Kanan.dispField;
   this(Field field, uint turn, int[] myMoveDir, int[] originMoveDir, uint nextNodeWidth) {
-    this.field = Field(field, myMoveDir);
+    this.field = Field(field, myMoveDir, turn % 2 != 0 ? true : false);
     this.nextNodeWidth = nextNodeWidth;
     this.turn = turn;
     this.evalValue = 0;
@@ -287,9 +287,17 @@ class KananBeamSearch {
     auto top = maxElement!("a.evalValue")(searchFinished[]);
 
     foreach (i; 0 .. top.field.agentNum) {
-      answer ~= Actions(top.field.myAgentData[i][0], "move", dx[top.originMoveDir[i]], dy[top.originMoveDir[i]]);
-    }
+      string movePattern;
+      if (top.field.color[top.field.myAgentData[i][2] + dy[top.originMoveDir[i]]][top.field.myAgentData[i][1] + dx[top.originMoveDir[i]]] == top.field.rivalTeamID)
+        movePattern = "remove";
+      else if ((top.field.myAgentData[i][2] + dy[top.originMoveDir[i]]) == (top.field.myAgentData[i][2]) &&
+               (top.field.myAgentData[i][1] + dx[top.originMoveDir[i]]) == (top.field.myAgentData[i][1]))
+        movePattern = "stay";
+      else
+        movePattern = "move";
 
+      answer ~= Actions(top.field.myAgentData[i][0], movePattern, dx[top.originMoveDir[i]], dy[top.originMoveDir[i]]);
+    }
     return answer;
   }
 }
