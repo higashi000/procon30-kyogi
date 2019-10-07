@@ -6,7 +6,42 @@ import std.stdio;
 import std.file;
 import std.container;
 
-string guchoku_search(int[20][20] eval){
+import sakura.opencsv;
+
+int[20][20] eval;
+string [20][20] colors;
+
+string guchoku_first_search(){
+  eval = opencsv(readln.split[0].to!string);
+  colors = opencolor();
+
+  for (int i = 0; i < 10; i++)
+  {
+    writefln ("+---+---+---+---+---+---+---+---+---+---+");
+    for (int j = 0; j < 10; j++)
+    {
+      writef ("|");
+      switch (colors[i][j]){
+        case "red":
+          writef ("\x1b[30m");
+          writef ("\x1b[41m");
+          break;
+        case "blue":
+        writef ("\x1b[44m");
+        writef ("\x1b[30m");
+          break;
+          default:
+          writef ("\x1b[49m");
+          writef ("\x1b[39m");
+          break;
+      }
+      writef ("%3d", eval[i][j]);
+      writef ("\x1b[49m");
+      writef ("\x1b[39m");
+    }
+    writef ("|");
+    writeln();
+  }
 
   write ("ageNum : ");
   auto ageNum = readln.split[0].to!(int);

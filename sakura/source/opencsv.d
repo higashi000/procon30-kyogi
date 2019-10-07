@@ -5,15 +5,19 @@ import std.range;
 import std.file;
 import std.conv;
 
+int range_begin = 0, range_end = 0;
+int w, h;
+
 int[20][20] opencsv(string file_head){
 
-  int range_begin = 0, range_end = 0;
+  range_begin = 0;
+  range_end = 0;
   int[20][20] eval;
   string evl = readText(file_head ~ ".csv");
 
   // 仮にフィールドが width = 10 , hight = 10 とする
-  int w = 10;
-  int h = 10;
+  w = 10;
+  h = 10;
 
   // 評価値を配列に格納する
   for (int i = 0; i < w; i++){
@@ -24,4 +28,20 @@ int[20][20] opencsv(string file_head){
     }
   }
   return (eval);
+}
+
+string[20][20] opencolor(string a = readText("color.csv"))
+{
+  string[20][20] colors;
+  range_begin = 0;
+  range_end = 0;
+
+  for (int i = 0; i < w; i++){
+    for (int j = 0; j < h; j++){
+      while (a[range_end] != ',') range_end++;
+      colors[i][j] = to!(string)(a[range_begin..range_end]);
+      range_begin = ++range_end;
+    }
+  }
+  return (colors);
 }
