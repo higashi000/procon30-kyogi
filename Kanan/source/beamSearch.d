@@ -16,6 +16,10 @@ struct Node {
     this.turn = turn;
     this.evalValue = 0;
     this.parentNode = parentNode;
+    this.myMoveDir = new int[field.agentNum];
+    foreach (i; 0 .. myMoveDir.length) {
+      this.myMoveDir[i] = myMoveDir[i];
+    }
     this.originMoveDir = new int[originMoveDir.length];
     foreach (i; 0 .. originMoveDir.length) {
       this.originMoveDir[i] = originMoveDir[i];
@@ -24,6 +28,7 @@ struct Node {
 
   this(Field field, uint turn, uint nextNodeWidth) {
     this.field = Field(field);
+    this.parentNode = null;
     this.nextNodeWidth = nextNodeWidth;
     this.turn = turn;
     this.evalValue = 0;
@@ -32,6 +37,7 @@ struct Node {
   S childNodes;
   Node* parentNode;
   int[] originMoveDir;
+  int[] myMoveDir;
 
   uint nextNodeWidth;
   int evalValue;
@@ -227,6 +233,16 @@ struct Node {
       evalValue += 100 / distance;
     }
   }
+
+  int[] firstMove()
+  {
+    auto node = &this;
+    while (node.parentNode.parentNode != null) {
+      node = node.parentNode;
+    }
+
+    return node.myMoveDir;
+  }
 }
 
 class KananBeamSearch {
@@ -288,18 +304,19 @@ class KananBeamSearch {
   {
     Actions[] answer;
     auto top = maxElement!("a.evalValue")(searchFinished[]);
+    auto moveDir = top.firstMove();
 
     foreach (i; 0 .. top.field.agentNum) {
       string movePattern;
-      if (top.field.color[top.field.myAgentData[i][2] + dy[top.originMoveDir[i]]][top.field.myAgentData[i][1] + dx[top.originMoveDir[i]]] == top.field.rivalTeamID)
+      if (top.field.color[top.field.myAgentData[i][2] + dy[moveDir[i]]][top.field.myAgentData[i][1] + dx[moveDir[i]]] == top.field.rivalTeamID)
         movePattern = "remove";
-      else if ((top.field.myAgentData[i][2] + dy[top.originMoveDir[i]]) == (top.field.myAgentData[i][2]) &&
-               (top.field.myAgentData[i][1] + dx[top.originMoveDir[i]]) == (top.field.myAgentData[i][1]))
+      else if ((top.field.myAgentData[i][2] + dy[moveDir[i]]) == (top.field.myAgentData[i][2]) &&
+               (top.field.myAgentData[i][1] + dx[moveDir[i]]) == (top.field.myAgentData[i][1]))
         movePattern = "stay";
       else
         movePattern = "move";
 
-      answer ~= Actions(top.field.myAgentData[i][0], movePattern, dx[top.originMoveDir[i]], dy[top.originMoveDir[i]]);
+      answer ~= Actions(top.field.myAgentData[i][0], movePattern, dx[moveDir[i]], dy[moveDir[i]]);
     }
     return answer;
   }
