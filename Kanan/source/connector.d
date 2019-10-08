@@ -63,7 +63,9 @@ class KananConnector {
       sendData ~= ";";
     }
 
+    writeln(sendData);
     socket.send(sendData);
+    socket.close();
   }
 
   Field parseFieldData()
