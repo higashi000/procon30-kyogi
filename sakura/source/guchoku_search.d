@@ -10,17 +10,32 @@ import sakura.opencsv;
 
 int[20][20] eval;
 string [20][20] colors;
+int ageNum;
+string way;
 
 string guchoku_first_search(){
+  way = null;
   eval = opencsv(readln.split[0].to!string);
   colors = opencolor();
 
+  write ("ageNum : ");
+  ageNum = readln.split[0].to!(int);
+  int[10] age_x, age_y;
+  int w = 10, h = 10;
+
+  for (int i = 0; i < ageNum; i++){
+
+    writef ("myAgent_%d_x : ", i + 1);
+    age_x[i] = readln.split[0].to!(int);
+
+    writef ("myAgent_%d_y : ", i + 1);
+    age_y[i] = readln.split[0].to!(int);
+  }
+
   for (int i = 0; i < 10; i++)
   {
-    writefln ("+---+---+---+---+---+---+---+---+---+---+");
     for (int j = 0; j < 10; j++)
     {
-      writef ("|");
       switch (colors[i][j]){
         case "red":
           writef ("\x1b[30m");
@@ -41,21 +56,6 @@ string guchoku_first_search(){
     }
     writef ("|");
     writeln();
-  }
-
-  write ("ageNum : ");
-  auto ageNum = readln.split[0].to!(int);
-  string way;
-  int[10] age_x, age_y;
-  int w = 10, h = 10;
-
-  for (int i = 0; i < ageNum; i++){
-
-    writef ("myAgent_%d_x : ", i + 1);
-    age_x[i] = readln.split[0].to!(int);
-
-    writef ("myAgent_%d_y : ", i + 1);
-    age_y[i] = readln.split[0].to!(int);
   }
 
   int[9] branch = 0;
@@ -87,7 +87,7 @@ string guchoku_first_search(){
         break;
 
         case 4:
-        branch[i] = 0;
+        branch[i] = -1000;
         break;
 
         case 5:
@@ -113,13 +113,10 @@ string guchoku_first_search(){
         default:
       }
     }
-  }
-
-  foreach (i; 0..ageNum){
     int answer = 4;
     foreach(j; 0..9) if (branch[j] > branch[answer]) answer = j;
-    if (i != 0) way ~= ",";
-    way ~="myAgent_" ~ (i + 1).to!string ~ "_" ~ (answer + 1).to!string;
-    }
+    if (e != 0) way ~= ",";
+    way ~="myAgent_" ~ (e + 1).to!string ~ "_" ~ (answer + 1).to!string;
+  }
   return (way);
 }
