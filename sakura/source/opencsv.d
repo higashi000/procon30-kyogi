@@ -29,19 +29,3 @@ int[20][20] opencsv(string file_head){
   }
   return (eval);
 }
-
-string[20][20] opencolor(string a = readText("color.csv"))
-{
-  string[20][20] colors;
-  range_begin = 0;
-  range_end = 0;
-
-  for (int i = 0; i < w; i++){
-    for (int j = 0; j < h; j++){
-      while (a[range_end] != ',') range_end++;
-      colors[i][j] = to!(string)(a[range_begin..range_end]);
-      range_begin = ++range_end;
-    }
-  }
-  return (colors);
-}
