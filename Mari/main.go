@@ -48,8 +48,6 @@ func main() {
   args := flag.Args()
 
   var cntConect int;
-  solverAnswer := make([]Action, 0)
-  guiAnswer := make([]Action, 0)
 
   myTeamID, _ = strconv.Atoi(args[2])
   maxTurn = args[3]
@@ -68,14 +66,13 @@ func main() {
   cntConect = 0
 
   for {
-    connectClient(listener, args[4], &cntConect, &solverAnswer, &guiAnswer)
-    go connectClient(listener, args[4], &cntConect, &solverAnswer, &guiAnswer)
+    connectClient(listener, args[4], &cntConect)
+    go connectClient(listener, args[4], &cntConect)
   }
 }
 
-func connectClient(listener net.Listener, serverPORT string, cntConect *int, solverAnswer *[]Action, guiAnswer *[]Action) {
+func connectClient(listener net.Listener, serverPORT string, cntConect *int) {
   conn, err := listener.Accept()
-
 
   if err != nil {
     fmt.Println("error")
@@ -88,20 +85,24 @@ func connectClient(listener net.Listener, serverPORT string, cntConect *int, sol
   if err != nil {
     fmt.Println("error")
   }
+
+  fmt.Println(string(rsvData))
   switch string(rsvData[0:2]) {
     case "sf" :
       conn.Write([]byte(convertJsonToSendData()))
     case "gf" :
       conn.Write([]byte(convertJsonToSendDataForGUI()))
     case "2s" :
-      rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT, solverAnswer, guiAnswer)
+      rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT)
     case "2g" :
-      rsvGUIData(cntConect, string(rsvData[3:n]), serverPORT, guiAnswer, solverAnswer)
+      rsvGUIData(cntConect, string(rsvData[3:n]), serverPORT)
 
   }
 }
 
-func rsvSolverData(cntConect *int, rsvData string, port string, answer *[]Action, otherAnswer *[]Action) {
+func rsvSolverData(cntConect *int, rsvData string, port string) {
+
+  answer := make([]Action, 0)
 
   parseData := strings.Split(rsvData, ";")
 
@@ -113,21 +114,17 @@ func rsvSolverData(cntConect *int, rsvData string, port string, answer *[]Action
     dx, _ := strconv.Atoi(agentData[2])
     dy, _ := strconv.Atoi(agentData[3])
 
-    *answer = append(*answer, Action{agentID, moveType, dx, dy})
+    answer = append(answer, Action{agentID, moveType, dx, dy})
   }
 
-  *cntConect++
-
-  fmt.Println(*cntConect)
-  if *cntConect >= 2 {
-    sendResult(*answer, *otherAnswer, port, "1")
-    *cntConect = 0;
-  }
+  sendResult(answer, port, "1")
+  *cntConect = 0;
 }
 
-func rsvGUIData(cntConect *int, rsvData string, port string, answer *[]Action, otherAnswer *[]Action) {
+func rsvGUIData(cntConect *int, rsvData string, port string) {
 
   parseData := strings.Split(rsvData, ";")
+  answer := make([]Action, 0)
 
   for i := 0; i < len(parseData) - 1; i++ {
     agentData := strings.Split(parseData[i], " ")
@@ -137,30 +134,14 @@ func rsvGUIData(cntConect *int, rsvData string, port string, answer *[]Action, o
     dx, _ := strconv.Atoi(agentData[2])
     dy, _ := strconv.Atoi(agentData[3])
 
-    *answer = append(*answer, Action{agentID, moveType, dx, dy})
+    answer = append(answer, Action{agentID, moveType, dx, dy})
   }
 
-  *cntConect++
-
-  fmt.Println(*cntConect)
-  if *cntConect >= 2 {
-    sendResult(*otherAnswer, *answer, port, "1")
-    *cntConect = 0;
-  }
+  sendResult(answer, port, "1")
+  *cntConect = 0;
 }
 
-func sendResult(solverAnswer []Action, guiAnswer []Action, port string, matchID string) {
-  for i := 0; i < len(guiAnswer); i++ {
-    for j := 0; j < len(solverAnswer); j++ {
-      if solverAnswer[j].AgentID == guiAnswer[i].AgentID {
-        solverAnswer[j].Type = guiAnswer[i].Type
-        solverAnswer[j].Dx = guiAnswer[i].Dx
-        solverAnswer[j].Dy = guiAnswer[i].Dy
-        continue;
-      }
-    }
-  }
-
+func sendResult(solverAnswer []Action, port string, matchID string) {
   sendMoveInform := `{"actions":[`
   for i := 0; i < len(solverAnswer); i++ {
     sendMoveInform += `{"agentID":` + strconv.Itoa(solverAnswer[i].AgentID) + "," + `"type":"` + solverAnswer[i].Type + `",` + `"dx":` + strconv.Itoa(solverAnswer[i].Dx) + "," + `"dy":` + strconv.Itoa(solverAnswer[i].Dy) + "}"
