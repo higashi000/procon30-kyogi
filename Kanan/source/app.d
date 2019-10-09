@@ -1,5 +1,5 @@
 import std.stdio, std.conv;
-import Kanan.field, Kanan.montecarlo, Kanan.beamSearch, Kanan.connector;
+import Kanan.field, Kanan.dispField, Kanan.montecarlo, Kanan.beamSearch, Kanan.connector;
 
 // コマンドライン引数にMariのip,port,試合の最大ターン数をつけて
 void main(string[] args)
@@ -13,6 +13,8 @@ void main(string[] args)
     connector.getFieldData();
     auto field = connector.parseFieldData();
     writeln(turn);
+    disp(field);
+    writeln;
 
     if (turn < maxTurn / 2) {
       auto beamSearch = new KananBeamSearch(field, turn, maxTurn, 20, 9 ^^ 3);
@@ -20,8 +22,8 @@ void main(string[] args)
       auto answer = beamSearch.bestAnswer();
       connector.sendResult(answer);
     } else {
-      auto montecarlo = new Montecarlo(field, turn, maxTurn, 4500, 20);
-      auto answer = montecarlo.bestAnswer();
+      auto montecarlo = new MontecarloTreeSearch(field, turn, maxTurn, 4500, 20);
+      auto answer = montecarlo.playGame();
 
       connector.sendResult(answer);
     }
