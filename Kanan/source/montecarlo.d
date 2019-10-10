@@ -174,14 +174,19 @@ struct MontecarloNode {
 // MCTS用のNode {{{
 struct MCTSNode {
   this(Field field, MCTSNode* parentNode, uint turn, int[] myMoveDir, uint nextNodeWidth) {
-    this.field = Field(field, myMoveDir, turn % 2 != 0 ? true : false);
     this.parentNode = parentNode;
     this.turn = turn;
     this.cntPlayOut = 0;
     this.myMoveDir = new int[myMoveDir.length];
     foreach (i; 0 .. myMoveDir.length) {
-      this.myMoveDir[i] = myMoveDir[i];
+      if (field.dx[myMoveDir[i]] + field.myAgentData[i][1] < 0 || field.width <= field.dx[myMoveDir[i]] + field.myAgentData[i][1])
+        this.myMoveDir[i] = 0;
+      else if (field.dy[myMoveDir[i]] + field.myAgentData[i][2] < 0 || field.height <= field.dy[myMoveDir[i]] + field.myAgentData[i][2])
+        this.myMoveDir[i] = 0;
+      else
+        this.myMoveDir[i] = myMoveDir[i];
     }
+    this.field = Field(field, this.myMoveDir, turn % 2 != 0 ? true : false);
 
     this.nextNodeWidth = nextNodeWidth;
     this.win = false;
@@ -217,7 +222,7 @@ struct MCTSNode {
     if (nextNode.turn <= maxTurn) {
       int[] agentDir;
       foreach (i; 0 .. field.agentNum)
-        agentDir ~= uniform(0, 9);
+        agentDir ~= uniform(1, 9);
       playOut(MCTSNode(nextNode.field, &this, nextNode.turn + 1, agentDir, nextNode.nextNodeWidth), maxTurn);
     }
 
@@ -492,7 +497,10 @@ class MontecarloTreeSearch {
     Actions[] answer;
 
     foreach (i; 0 .. topNode.field.agentNum) {
-      string movePattern;
+      writeln(topNode.myMoveDir);
+      writeln(topNode.field.myAgentData[i][1] + dx[topNode.myMoveDir[i]]);
+      writeln(topNode.field.myAgentData[i][2] + dy[topNode.myMoveDir[i]]);
+      string movePattern = "move";
       if (topNode.field.color[topNode.field.myAgentData[i][2] + dy[topNode.myMoveDir[i]]][topNode.field.myAgentData[i][1] + dx[topNode.myMoveDir[i]]] == topNode.field.rivalTeamID)
         movePattern = "remove";
       else if ((topNode.field.myAgentData[i][2] + dy[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][2]) &&
