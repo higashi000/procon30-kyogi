@@ -12,6 +12,9 @@ struct MontecarloNode {
   this(Field field, uint turn, int[] myMoveDir, uint nextNodeWidth) {
     this.nextNodeWidth = nextNodeWidth;
     this.field = Field(field, myMoveDir, turn % 2 != 0 ? true : false);
+    this.field.calcTilePoint();
+    this.field.calcMyAreaPoint();
+    this.field.calcRivalAreaPoint();
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
@@ -26,6 +29,9 @@ struct MontecarloNode {
     this.nextNodeWidth = nextNodeWidth;
     this.field = Field(field, myMoveDir, turn % 2 != 0 ? true : false);
     this.field = Field(field);
+    this.field.calcTilePoint();
+    this.field.calcMyAreaPoint();
+    this.field.calcRivalAreaPoint();
     this.turn = turn;
     this.evalValue = result();
     this.childEval = 0;
@@ -188,6 +194,10 @@ struct MCTSNode {
     }
     this.field = Field(field, this.myMoveDir, turn % 2 != 0 ? true : false);
 
+    this.field.moveAgent(this.myMoveDir, true);
+    this.field.calcTilePoint();
+    this.field.calcMyAreaPoint();
+    this.field.calcRivalAreaPoint();
     this.nextNodeWidth = nextNodeWidth;
     this.win = false;
     this.ucb = 0.0;
@@ -195,6 +205,9 @@ struct MCTSNode {
   this(Field field, uint turn, uint nextNodeWidth) {
     this.nextNodeWidth = nextNodeWidth;
     this.field = Field(field);
+    this.field.calcTilePoint();
+    this.field.calcMyAreaPoint();
+    this.field.calcRivalAreaPoint();
     this.parentNode = null;
     this.turn = turn;
     this.cntPlayOut = 0;
@@ -271,8 +284,8 @@ struct MCTSNode {
     MCTSNode*[] ret;
     MCTSNode* tmp;
 
-    foreach (i; 0 .. 9) {
-      foreach (j; 0 .. 9) {
+    foreach (i; 1 .. 9) {
+      foreach (j; 1 .. 9) {
         tmp = new MCTSNode(field, &this, turn + 1, [i, j], nextNodeWidth);
         ret ~= tmp;
       }
@@ -283,9 +296,9 @@ struct MCTSNode {
     MCTSNode*[] ret;
     MCTSNode* tmp;
 
-    foreach (i; 0 .. 9) {
-      foreach (j; 0 .. 9) {
-        foreach (k; 0 .. 9) {
+    foreach (i; 1 .. 9) {
+      foreach (j; 1 .. 9) {
+        foreach (k; 1 .. 9) {
           tmp = new MCTSNode(field, &this, turn + 1, [i, j, k], nextNodeWidth);
           ret ~= tmp;
         }
@@ -298,10 +311,10 @@ struct MCTSNode {
     MCTSNode*[] ret;
     MCTSNode* tmp;
 
-    foreach (i; 0 .. 9) {
-      foreach (j; 0 .. 9) {
-        foreach (k; 0 .. 9) {
-          foreach (l; 0 .. 9) {
+    foreach (i; 1 .. 9) {
+      foreach (j; 1 .. 9) {
+        foreach (k; 1 .. 9) {
+          foreach (l; 1 .. 9) {
             tmp = new MCTSNode(field, &this, turn + 1, [i, j, k, l], nextNodeWidth);
             ret ~= tmp;
           }
@@ -316,11 +329,11 @@ struct MCTSNode {
     MCTSNode*[] ret;
     MCTSNode* tmp;
 
-    foreach (i; 0 .. 9) {
-      foreach (j; 0 .. 9) {
-        foreach (k; 0 .. 9) {
-          foreach (l; 0 .. 9) {
-            foreach (m; 0 .. 9) {
+    foreach (i; 1 .. 9) {
+      foreach (j; 1 .. 9) {
+        foreach (k; 1 .. 9) {
+          foreach (l; 1 .. 9) {
+            foreach (m; 1 .. 9) {
               tmp = new MCTSNode(field, &this, turn + 1, [i, j, k, l, m], nextNodeWidth);
               ret ~= tmp;
             }
@@ -339,7 +352,7 @@ struct MCTSNode {
     foreach (i; 0 .. nextNodeWidth) {
       int[] tmpMoveDir;
       foreach (j; 0 .. field.agentNum) {
-        tmpMoveDir ~= uniform(0, 9);
+        tmpMoveDir ~= uniform(1, 9);
       }
       tmp = new MCTSNode(field, &this, turn + 1, tmpMoveDir, nextNodeWidth);
       ret ~= tmp;
@@ -501,10 +514,10 @@ class MontecarloTreeSearch {
       writeln(topNode.field.myAgentData[i][1] + dx[topNode.myMoveDir[i]]);
       writeln(topNode.field.myAgentData[i][2] + dy[topNode.myMoveDir[i]]);
       string movePattern = "move";
-      if (topNode.field.color[topNode.field.myAgentData[i][2] + dy[topNode.myMoveDir[i]]][topNode.field.myAgentData[i][1] + dx[topNode.myMoveDir[i]]] == topNode.field.rivalTeamID)
+      if (topNode.field.color[topNode.field.myAgentData[i][2]][topNode.field.myAgentData[i][1]] == topNode.field.rivalTeamID)
         movePattern = "remove";
-      else if ((topNode.field.myAgentData[i][2] + dy[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][2]) &&
-               (topNode.field.myAgentData[i][1] + dx[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][1]))
+      else if ((topNode.field.myAgentData[i][2] - dy[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][2]) &&
+               (topNode.field.myAgentData[i][1] - dx[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][1]))
         movePattern = "stay";
       else
         movePattern = "move";
