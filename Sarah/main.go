@@ -98,7 +98,7 @@ func rsvActionData(r *gin.Engine, field *FieldData) {
         var tmp Action
         tmp.AgentID = 0
         tmp.Type = "move"
-        dir := rand.Intn(9)
+        dir := rand.Intn(8)
         tmp.Dx = dx[dir]
         tmp.Dy = dy[dir]
         randAction.AgentActions = append(randAction.AgentActions, tmp)
@@ -113,15 +113,15 @@ func checkDuplicate(whichTeam bool, tmpPos [][]int, agentNum int, field FieldDat
     for i := 0; i < agentNum; i++ {
       for j := 0; j < len(tmpPos); j++ {
         if i != j && tmpPos[i][0] == tmpPos[j][0] && tmpPos[i][1] == tmpPos[j][1] {
-          tmpPos[i][0] = field.Teams[0].Agents[i].X
-          tmpPos[i][1] = field.Teams[0].Agents[i].Y
+          tmpPos[i][0] = field.Teams[0].Agents[i].X - 1
+          tmpPos[i][1] = field.Teams[0].Agents[i].Y - 1
 
           if j < agentNum {
-            tmpPos[j][0] = field.Teams[0].Agents[j].X
-            tmpPos[j][1] = field.Teams[0].Agents[j].Y
+            tmpPos[j][0] = field.Teams[0].Agents[j].X - 1
+            tmpPos[j][1] = field.Teams[0].Agents[j].Y - 1
           } else if agentNum <= j && j < agentNum * 2 {
-            tmpPos[j + agentNum][0] = field.Teams[1].Agents[j].X
-            tmpPos[j + agentNum][1] = field.Teams[1].Agents[j].Y
+            tmpPos[j + agentNum][0] = field.Teams[1].Agents[j].X - 1
+            tmpPos[j + agentNum][1] = field.Teams[1].Agents[j].Y - 1
           }
         }
       }
@@ -130,15 +130,15 @@ func checkDuplicate(whichTeam bool, tmpPos [][]int, agentNum int, field FieldDat
     for i := 0; i < agentNum; i++ {
       for j := 0; j < len(tmpPos); j++ {
         if i != j && tmpPos[i][0] == tmpPos[j][0] && tmpPos[i][1] == tmpPos[j][1] {
-          tmpPos[i][0] = field.Teams[1].Agents[i].X
-          tmpPos[i][1] = field.Teams[1].Agents[i].Y
+          tmpPos[i][0] = field.Teams[1].Agents[i].X - 1
+          tmpPos[i][1] = field.Teams[1].Agents[i].Y - 1
 
           if j < agentNum {
-            tmpPos[j][0] = field.Teams[0].Agents[j].X
-            tmpPos[j][1] = field.Teams[0].Agents[j].Y
+            tmpPos[j][0] = field.Teams[0].Agents[j].X - 1
+            tmpPos[j][1] = field.Teams[0].Agents[j].Y - 1
           } else if agentNum <= j && j < agentNum * 2 {
-            tmpPos[j + agentNum][0] = field.Teams[1].Agents[j].X
-            tmpPos[j + agentNum][1] = field.Teams[1].Agents[j].Y
+            tmpPos[j + agentNum][0] = field.Teams[1].Agents[j].X - 1
+            tmpPos[j + agentNum][1] = field.Teams[1].Agents[j].Y - 1
           }
         }
       }
@@ -160,11 +160,11 @@ func updateFieldData(field *FieldData, action Actions, whichTeam int) {
       tmpPos[i][1] = field.Teams[0].Agents[i].Y + action.AgentActions[i].Dy - 1
 
       if tmpPos[i][0] < 0 || field.Width <= tmpPos[i][0] {
-        tmpPos[i][0] = field.Teams[0].Agents[i].X
-        tmpPos[i][1] = field.Teams[0].Agents[i].Y
+        tmpPos[i][0] = field.Teams[0].Agents[i].X - 1
+        tmpPos[i][1] = field.Teams[0].Agents[i].Y - 1
       } else if tmpPos[i][1] < 0 || field.Height <= tmpPos[i][1] {
-        tmpPos[i][0] = field.Teams[0].Agents[i].X
-        tmpPos[i][1] = field.Teams[0].Agents[i].Y
+        tmpPos[i][0] = field.Teams[0].Agents[i].X - 1
+        tmpPos[i][1] = field.Teams[0].Agents[i].Y - 1
       }
 
       if field.Tiled[tmpPos[i][1]][tmpPos[i][0]] == field.Teams[1].TeamID {
@@ -191,11 +191,11 @@ func updateFieldData(field *FieldData, action Actions, whichTeam int) {
       tmpPos[i][1] = field.Teams[1].Agents[i].Y + action.AgentActions[i].Dy - 1
 
       if tmpPos[i][0] < 0 || field.Width <= tmpPos[i][0] {
-        tmpPos[i][0] = field.Teams[1].Agents[i].X
-        tmpPos[i][1] = field.Teams[1].Agents[i].Y
+        tmpPos[i][0] = field.Teams[1].Agents[i].X - 1
+        tmpPos[i][1] = field.Teams[1].Agents[i].Y - 1
       } else if tmpPos[i][1] < 0 || field.Height <= tmpPos[i][1] {
-        tmpPos[i][0] = field.Teams[1].Agents[i].X
-        tmpPos[i][1] = field.Teams[1].Agents[i].Y
+        tmpPos[i][0] = field.Teams[1].Agents[i].X - 1
+        tmpPos[i][1] = field.Teams[1].Agents[i].Y - 1
       }
 
       fmt.Println(tmpPos[i][0])
