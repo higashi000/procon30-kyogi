@@ -179,7 +179,7 @@ struct MontecarloNode {
 
 // MCTS用のNode {{{
 struct MCTSNode {
-  this(Field field, MCTSNode* parentNode, uint turn, int[] myMoveDir, uint nextNodeWidth) {
+  this(Field field, MCTSNode* parentNode, uint turn, int[] myMoveDir, uint nextNodeWidth, bool whichMove) {
     this.parentNode = parentNode;
     this.turn = turn;
     this.cntPlayOut = 0;
@@ -192,13 +192,14 @@ struct MCTSNode {
       else
         this.myMoveDir[i] = myMoveDir[i];
     }
-    this.field = Field(field, this.myMoveDir, turn % 2 != 0 ? true : false);
+    this.field = Field(field, this.myMoveDir, whichMove);
 
     this.field.moveAgent(this.myMoveDir, true);
     this.field.calcTilePoint();
     this.field.calcMyAreaPoint();
     this.field.calcRivalAreaPoint();
     this.nextNodeWidth = nextNodeWidth;
+    this.whichMove = whichMove;
     this.win = false;
     this.ucb = 0.0;
   }
@@ -216,6 +217,7 @@ struct MCTSNode {
     this.win = false;
     this.getNextNode();
     this.ucb = 0.0;
+    this.whichMove = false;
   }
 
   Field field;
@@ -227,6 +229,7 @@ struct MCTSNode {
   int[] myMoveDir;
   uint nextNodeWidth;
   uint winCnt;
+  uint whichMove;
   double ucb;
   bool win;
 
@@ -236,7 +239,7 @@ struct MCTSNode {
       int[] agentDir;
       foreach (i; 0 .. field.agentNum)
         agentDir ~= uniform(1, 9);
-      playOut(MCTSNode(nextNode.field, &this, nextNode.turn + 1, agentDir, nextNode.nextNodeWidth), maxTurn);
+      playOut(MCTSNode(nextNode.field, &this, (nextNode.whichMove ? nextNode.turn : nextNode.turn + 1), agentDir, nextNode.nextNodeWidth, (nextNode.whichMove ? false : true)), maxTurn);
     }
 
     if ((nextNode.field.myAreaPoint + nextNode.field.myTilePoint) > (nextNode.field.rivalAreaPoint + nextNode.field.rivalTilePoint))
@@ -286,7 +289,10 @@ struct MCTSNode {
 
     foreach (i; 1 .. 9) {
       foreach (j; 1 .. 9) {
-        tmp = new MCTSNode(field, &this, turn + 1, [i, j], nextNodeWidth);
+        if (whichMove)
+          tmp = new MCTSNode(field, &this, turn + 1, [i, j], nextNodeWidth, false);
+        else
+          tmp = new MCTSNode(field, &this, turn + 1, [i, j], nextNodeWidth, true);
         ret ~= tmp;
       }
     }
@@ -299,7 +305,10 @@ struct MCTSNode {
     foreach (i; 1 .. 9) {
       foreach (j; 1 .. 9) {
         foreach (k; 1 .. 9) {
-          tmp = new MCTSNode(field, &this, turn + 1, [i, j, k], nextNodeWidth);
+          if (whichMove)
+            tmp = new MCTSNode(field, &this, turn + 1, [i, j, k], nextNodeWidth, false);
+          else
+            tmp = new MCTSNode(field, &this, turn + 1, [i, j, k], nextNodeWidth, true);
           ret ~= tmp;
         }
       }
@@ -315,7 +324,10 @@ struct MCTSNode {
       foreach (j; 1 .. 9) {
         foreach (k; 1 .. 9) {
           foreach (l; 1 .. 9) {
-            tmp = new MCTSNode(field, &this, turn + 1, [i, j, k, l], nextNodeWidth);
+            if (whichMove)
+              tmp = new MCTSNode(field, &this, turn + 1, [i, j, k, l], nextNodeWidth, false);
+            else
+              tmp = new MCTSNode(field, &this, turn + 1, [i, j, k, l], nextNodeWidth, true);
             ret ~= tmp;
           }
         }
@@ -334,7 +346,10 @@ struct MCTSNode {
         foreach (k; 1 .. 9) {
           foreach (l; 1 .. 9) {
             foreach (m; 1 .. 9) {
-              tmp = new MCTSNode(field, &this, turn + 1, [i, j, k, l, m], nextNodeWidth);
+              if (whichMove)
+                tmp = new MCTSNode(field, &this, turn + 1, [i, j, k, l, m], nextNodeWidth, false);
+              else
+                tmp = new MCTSNode(field, &this, turn + 1, [i, j, k, l, m], nextNodeWidth, true);
               ret ~= tmp;
             }
           }
@@ -354,7 +369,10 @@ struct MCTSNode {
       foreach (j; 0 .. field.agentNum) {
         tmpMoveDir ~= uniform(1, 9);
       }
-      tmp = new MCTSNode(field, &this, turn + 1, tmpMoveDir, nextNodeWidth);
+      if (whichMove)
+        tmp = new MCTSNode(field, &this, turn + 1, tmpMoveDir, nextNodeWidth, false);
+      else
+        tmp = new MCTSNode(field, &this, turn + 1, tmpMoveDir, nextNodeWidth, true);
       ret ~= tmp;
     }
 
@@ -486,46 +504,46 @@ class MontecarloTreeSearch {
     import std.datetime;
     auto st = Clock.currTime;
 
-    loop: while (Clock.currTime - st <= thinkingTime.msecs) {
-      MCTSNode* node = root;
+loop: while (Clock.currTime - st <= thinkingTime.msecs) {
+        MCTSNode* node = root;
 
-      while (node.untriedNode.length == 0 && node.triedNode.length != 0) {
-        if (Clock.currTime - st >= thinkingTime.msecs)
-          break loop;
-        node = selectNext(node);
+        while (node.untriedNode.length == 0 && node.triedNode.length != 0) {
+          if (Clock.currTime - st >= thinkingTime.msecs)
+            break loop;
+          node = selectNext(node);
+        }
+
+        if (node.untriedNode.length != 0) {
+          if (Clock.currTime - st >= thinkingTime.msecs)
+            break loop;
+          node = expandNext(node);
+        }
+
+        auto res = node.playOut(*node, maxTurn);
+        res.propagate(res.win, allPlayOutCnt);
       }
 
-      if (node.untriedNode.length != 0) {
-        if (Clock.currTime - st >= thinkingTime.msecs)
-          break loop;
-        node = expandNext(node);
+      auto topNode = maxElement!("a.ucb")(root.triedNode);
+
+      Actions[] answer;
+
+      foreach (i; 0 .. topNode.field.agentNum) {
+        writeln(topNode.myMoveDir);
+        writeln(topNode.field.myAgentData[i][1] + dx[topNode.myMoveDir[i]]);
+        writeln(topNode.field.myAgentData[i][2] + dy[topNode.myMoveDir[i]]);
+        string movePattern = "move";
+        if (topNode.field.color[topNode.field.myAgentData[i][2]][topNode.field.myAgentData[i][1]] == topNode.field.rivalTeamID)
+          movePattern = "remove";
+        else if ((topNode.field.myAgentData[i][2] - dy[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][2]) &&
+            (topNode.field.myAgentData[i][1] - dx[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][1]))
+          movePattern = "stay";
+        else
+          movePattern = "move";
+
+        answer ~= Actions(topNode.field.myAgentData[i][0], movePattern, dx[topNode.myMoveDir[i]], dy[topNode.myMoveDir[i]]);
       }
 
-      auto res = node.playOut(*node, maxTurn);
-      res.propagate(res.win, allPlayOutCnt);
-    }
-
-    auto topNode = maxElement!("a.ucb")(root.triedNode);
-
-    Actions[] answer;
-
-    foreach (i; 0 .. topNode.field.agentNum) {
-      writeln(topNode.myMoveDir);
-      writeln(topNode.field.myAgentData[i][1] + dx[topNode.myMoveDir[i]]);
-      writeln(topNode.field.myAgentData[i][2] + dy[topNode.myMoveDir[i]]);
-      string movePattern = "move";
-      if (topNode.field.color[topNode.field.myAgentData[i][2]][topNode.field.myAgentData[i][1]] == topNode.field.rivalTeamID)
-        movePattern = "remove";
-      else if ((topNode.field.myAgentData[i][2] - dy[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][2]) &&
-               (topNode.field.myAgentData[i][1] - dx[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][1]))
-        movePattern = "stay";
-      else
-        movePattern = "move";
-
-      answer ~= Actions(topNode.field.myAgentData[i][0], movePattern, dx[topNode.myMoveDir[i]], dy[topNode.myMoveDir[i]]);
-    }
-
-    return answer;
+      return answer;
   }
 }
 // }}}
