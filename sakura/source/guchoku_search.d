@@ -175,7 +175,7 @@ string guchoku_search(){
 
   change_color();
   teki_way();
-    writeln();
+  writeln();
 
   int[9] branch = 0;
 
@@ -189,46 +189,54 @@ string guchoku_search(){
       switch (i)
       {
         case 0:
-        if (posi_w == 1 || posi_h == 1 || ans[i] == 9) branch[i] = -250;
+        if (posi_w == 1 || posi_h == 1) branch[i] = -2000;
+        else if (ans[i] == 9 || colors[posi_h - 2][posi_w - 2] == "cyan") branch[i] = -250;
         else branch[i] = eval[posi_h - 2][posi_w - 2];
         break;
 
         case 1:
-        if (posi_h == 1 || ans[i] == 8) branch[i] = -250;
+        if (posi_h == 1) branch[i] = -2000;
+        else if (ans[i] == 8 || colors[posi_h - 2][posi_w - 1] == "cyan")  branch[i] = -250;
         else branch[i] = eval[posi_h - 2][posi_w - 1];
         break;
 
         case 2:
-        if (posi_w == w || posi_h == 1 || ans[i] == 7)  branch[i] = -250;
+        if (posi_w == w || posi_h == 1)  branch[i] = -2000;
+        else if (ans[i] == 7 || colors[posi_h - 2][posi_w] == "cyan")branch[i] = -250;
         else branch[i] = eval[posi_h - 2][posi_w];
         break;
 
         case 3:
-        if (posi_w == 1 || ans[i] == 6) branch[i] = -250;
+        if (posi_w == 1) branch[i] = -2000;
+        else if (ans[i] == 6 || colors[posi_h - 1][posi_w - 2] == "cyan") branch[i] = -250;
         else branch[i] = eval[posi_h - 1][posi_w - 2];
         break;
 
         case 4:
-        branch[i] = -1000;
+        branch[i] = -100;
         break;
 
         case 5:
-        if (posi_w == w || ans[i] == 4) branch[i] = -250;
+        if (posi_w == w) branch[i] = -2000;
+        else if (ans[i] == 4 || colors[posi_h - 1][posi_w] == "cyan")  branch[i] = -250;
         else branch[i] = eval[posi_h - 1][posi_w];
         break;
 
         case 6:
-        if (posi_w == 1 || posi_h == h || ans[i] == 3) branch[i] = -250;
+        if (posi_w == 1 || posi_h == h) branch[i] = -2000;
+        else if (ans[i] == 3 || colors[posi_h][posi_w - 2] == "cyan") branch[i] = -2000;
         else branch[i] = eval[posi_h][posi_w - 2];
         break;
 
         case 7:
-        if (posi_h == h || ans[i] == 2) branch[i] = -250;
+        if (posi_h == h) branch[i] = -2000;
+        else if (ans[i] == 2 || colors[posi_h][posi_w - 1] == "cyan") branch[i] = -250;
         else branch[i] = eval[posi_h][posi_w - 1];
         break;
 
         case 8:
-        if (posi_w == w || posi_h == h || ans[i] == 1) branch[i] = -250;
+        if (posi_w == w || posi_h == h) branch[i] = -2000;
+        else if (ans[i] == 1 || colors[posi_h][posi_w] == "cyan") branch[i] = -250;
         else branch[i] = eval[posi_h][posi_w];
         break;
 
