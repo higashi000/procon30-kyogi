@@ -136,9 +136,6 @@ func checkDuplicate(whichTeam bool, tmpPos [][]int, agentNum int, field FieldDat
           if j < agentNum {
             tmpPos[j][0] = field.Teams[0].Agents[j].X - 1
             tmpPos[j][1] = field.Teams[0].Agents[j].Y - 1
-          } else if agentNum <= j && j < agentNum * 2 {
-            tmpPos[j + agentNum][0] = field.Teams[1].Agents[j].X - 1
-            tmpPos[j + agentNum][1] = field.Teams[1].Agents[j].Y - 1
           }
         }
       }
@@ -210,7 +207,7 @@ func updateFieldData(field *FieldData, action Actions, whichTeam int) {
     checkDuplicate(false, tmpPos, agentNum, *field)
 
     for i := 0; i < agentNum; i++ {
-      if field.Tiled[tmpPos[i][1]][tmpPos[i][0]] == field.Teams[1].TeamID {
+      if field.Tiled[tmpPos[i][1]][tmpPos[i][0]] == field.Teams[0].TeamID {
         field.Tiled[tmpPos[i][1]][tmpPos[i][0]] = 0
       } else {
         field.Teams[1].Agents[i].X = tmpPos[i][0] + 1
