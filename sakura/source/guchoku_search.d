@@ -165,8 +165,6 @@ void teki_way(){
       break;
     }
     colors[teki_age_y[i] - 1][teki_age_x[i] - 1] = "red";
-    writefln ("teki_age_x[%d] : %d", i + 1, teki_age_x[i]);
-    writefln ("teki_age_y[%d] : %d", i + 1, teki_age_y[i]);
   }
 }
 
