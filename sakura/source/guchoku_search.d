@@ -9,6 +9,7 @@ import std.container;
 import sakura.opencsv;
 
 int[20][20] eval;
+int[20][20] points;
 string [20][20] colors =[["white","white","white","white","white","white","white","white","white","white"],
                           ["white","white","white","white","white","white","white","white","white","white"],
                           ["white","white","white","white","white","white","white","white","white","white"],
@@ -23,16 +24,20 @@ string [20][20] colors =[["white","white","white","white","white","white","white
 int ageNum;
 string way;
 
-int[10] my_age_x, my_age_y;
-int[10] teki_age_x, teki_age_y;
+int[10] my_age_x = 0, my_age_y = 0;
+int[10] teki_age_x  = 0, teki_age_y = 0;
 int w = 10, h = 10;
 int[10] ans = 11;
 
 void guchoku_first_search()
 {
   way = null;
-  write ("file_head : ");
-  eval = opencsv(readln.split[0].to!string);
+  write ("eval_head : ");
+  eval = evalcsv(readln.split[0].to!string);
+  writeln();
+
+  write ("points_head : ");
+  points = pointscsv(readln.split[0].to!string);
   writeln();
 
   write ("ageNum : ");
@@ -87,7 +92,7 @@ void guchoku_first_search()
         writef ("\x1b[39m");
         break;
       }
-      writef ("%3d", eval[i][j]);
+      writef ("%3d", points[i][j]);
       writef ("\x1b[49m");
       writef ("\x1b[39m");
     }
@@ -95,9 +100,7 @@ void guchoku_first_search()
   }
 }
 
-string guchoku_search(){
-  way = null;
-
+void change_color(){
   for (int i = 0; i < w; i++)
   {
     for (int j = 0; j < h; j++)
@@ -112,7 +115,9 @@ string guchoku_search(){
       }
     }
   }
-  writeln();
+}
+
+void teki_way(){
   for (int i = 0; i < ageNum; i++)
   {
     writef ("teki_ans[%d] : ", i + 1);
@@ -121,46 +126,56 @@ string guchoku_search(){
     switch (teki_ans)
     {
       case 1:
-        teki_age_x[i]--;
-        teki_age_y[i]--;
+        --teki_age_x[i];
+        --teki_age_y[i];
         break;
 
       case 2:
-        teki_age_x[i]--;
+        --teki_age_y[i];
         break;
 
       case 3:
-        teki_age_x[i]--;
-        teki_age_y[i]++;
+        ++teki_age_x[i];
+        --teki_age_y[i];
         break;
 
       case 4:
-        teki_age_y[i]--;
+        --teki_age_x[i];
         break;
 
       case 6:
-        teki_age_y[i]++;
+        ++teki_age_x[i];
         break;
 
       case 7:
-        teki_age_x[i]++;
-        teki_age_y[i]--;
+        --teki_age_x[i];
+        ++teki_age_y[i];
         break;
 
       case 8:
-        teki_age_x[i]++;
+        ++teki_age_y[i];
         break;
 
       case 9:
-        teki_age_x[i]++;
-        teki_age_y[i]++;
+        ++teki_age_x[i];
+        ++teki_age_y[i];
         break;
 
       default:
       break;
     }
     colors[teki_age_y[i] - 1][teki_age_x[i] - 1] = "red";
+    writefln ("teki_age_x[%d] : %d", i + 1, teki_age_x[i]);
+    writefln ("teki_age_y[%d] : %d", i + 1, teki_age_y[i]);
   }
+}
+
+string guchoku_search(){
+  way = null;
+
+  change_color();
+  teki_way();
+    writeln();
 
   int[9] branch = 0;
 
@@ -245,37 +260,37 @@ string guchoku_search(){
         break;
 
       case 2:
-        my_age_x[e]--;
+        my_age_y[e]--;
         break;
 
       case 3:
-        my_age_x[e]--;
-        my_age_y[e]++;
+        my_age_x[e]++;
+        my_age_y[e]--;
         break;
 
       case 4:
-        my_age_y[e]--;
+        my_age_x[e]--;
         break;
 
       case 5:
         break;
 
       case 6:
-        my_age_y[e]++;
+        my_age_x[e]++;
         break;
 
       case 7:
-        my_age_x[e]++;
-        teki_age_y[e]--;
+        my_age_y[e]++;
+        my_age_x[e]--;
         break;
 
       case 8:
-        my_age_x[e]++;
+        my_age_y[e]++;
         break;
 
       case 9:
-        my_age_x[e]++;
         my_age_y[e]++;
+        my_age_x[e]++;
         break;
 
       default:
@@ -290,19 +305,19 @@ string guchoku_search(){
       {
         for (int j = 0; j < h; j++)
         {
-          switch (colors[j][i])
+          switch (colors[i][j])
           {
             case "red":
             writef ("\x1b[30m"); // 黒字
             writef ("\x1b[41m"); // 赤背景
             break;
 
-            case "cyan":
+            case "blue":
             writef ("\x1b[44m"); // 青背景
             writef ("\x1b[30m"); // 黒字
             break;
 
-            case "blue":
+            case "cyan":
             writef ("\x1b[39m"); // デフォルト字
             writef ("\x1b[46m"); // シアン背景
             break;
@@ -317,7 +332,7 @@ string guchoku_search(){
             writef ("\x1b[39m");
             break;
           }
-          writef ("%3d", eval[i][j]);
+          writef ("%3d", points[i][j]);
           writef ("\x1b[49m");
           writef ("\x1b[39m");
         }
