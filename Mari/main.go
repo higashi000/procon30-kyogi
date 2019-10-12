@@ -44,6 +44,7 @@ type Action struct {
 var myTeamID int
 var maxTurn string
 var thinkingTime int
+var managementServer string
 
 func main() {
   starttUnixTime := time.Now().Unix()
@@ -54,7 +55,8 @@ func main() {
 
   myTeamID, _ = strconv.Atoi(args[2])
   maxTurn = args[3]
-  thinkingTime, _ = strconv.Atoi(args[5])
+  managementServer = args[4]
+  thinkingTime, _ = strconv.Atoi(args[6])
   serverAddress := args[0] + ":" + args[1]
   fmt.Println(serverAddress)
 
@@ -69,7 +71,7 @@ func main() {
   cntConect = 0
 
   for {
-    connectClient(listener, args[4], &cntConect, &starttUnixTime)
+    connectClient(listener, args[5], &cntConect, &starttUnixTime)
 //    go connectClient(listener, args[4], &cntConect )
   }
 }
@@ -190,7 +192,7 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 
   fmt.Println(sendMoveInform)
 
-  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
+  procon30RequestUrl := "http://" + managementServer + ":" + port + "/matches/"  + matchID + "/action"
   procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest(
@@ -215,7 +217,7 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
-  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID
+  procon30RequestUrl := "http://" + managementServer + ":" + port + "/matches/"  + matchID
   procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest("GET", procon30RequestUrl, nil)
