@@ -52,7 +52,6 @@ func main() {
   myTeamID, _ = strconv.Atoi(args[2])
   maxTurn = args[3]
   serverAddress := args[0] + ":" + args[1]
-
   fmt.Println(serverAddress)
 
   listener, err := net.Listen("tcp", serverAddress)
@@ -96,9 +95,34 @@ func connectClient(listener net.Listener, serverPORT string, cntConect *int) {
       rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT)
     case "2g" :
       rsvGUIData(cntConect, string(rsvData[3:n]), serverPORT)
+    case "gg" :
+      rsvHumanData(cntConect, string(rsvData[3:n]), serverPORT)
 
   }
 }
+
+func rsvHumanData(cntConect *int, rsvData string, port string) {
+
+  answer := make([]Action, 0)
+
+  parseData := strings.Split(rsvData, ";")
+
+  for i := 0; i < len(parseData) - 1; i++ {
+    agentData := strings.Split(parseData[i], " ")
+
+    agentID, _ := strconv.Atoi(agentData[0])
+    moveType := agentData[1]
+    dx, _ := strconv.Atoi(agentData[2])
+    dy, _ := strconv.Atoi(agentData[3])
+
+    answer = append(answer, Action{agentID, moveType, dx, dy})
+  }
+
+  sendResult(answer, port, "1")
+  *cntConect = 0;
+}
+
+
 
 func rsvSolverData(cntConect *int, rsvData string, port string) {
 
@@ -150,6 +174,8 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
     }
   }
   sendMoveInform += `]}`
+
+  fmt.Println(sendMoveInform)
 
   procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
   procon30Token := "procon30_example_token"
