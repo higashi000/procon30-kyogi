@@ -1,4 +1,4 @@
-module actions;
+module sakura.actions;
 
 struct Actions {
   this(int agentID, string type, int dx, int dy) {
