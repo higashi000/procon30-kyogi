@@ -10,16 +10,6 @@ import sakura.opencsv;
 
 int[20][20] eval;
 int[20][20] points;
-string [20][20] colors =[["white","white","white","white","white","white","white","white","white","white"],
-                          ["white","white","white","white","white","white","white","white","white","white"],
-                          ["white","white","white","white","white","white","white","white","white","white"],
-                          ["white","white","white","white","white","white","white","white","white","white"],
-                          ["white","white","white","white","white","white","white","white","white","white"],
-                          ["white","white","white","white","white","white","white","white","white","white"],
-                          ["white","white","white","white","white","white","white","white","white","white"],
-                          ["white","white","white","white","white","white","white","white","white","white"],
-                          ["white","white","white","white","white","white","white","white","white","white"],
-                          ["white","white","white","white","white","white","white","white","white","white"]];
 
 int ageNum;
 string way;
@@ -34,10 +24,6 @@ void guchoku_first_search()
   way = null;
   write ("eval_head : ");
   eval = evalcsv(readln.split[0].to!string);
-  writeln();
-
-  write ("points_head : ");
-  points = pointscsv(readln.split[0].to!string);
   writeln();
 
   write ("ageNum : ");
@@ -100,19 +86,14 @@ void guchoku_first_search()
   }
 }
 
-void change_color(){
+void change_color()
+{
   for (int i = 0; i < w; i++)
   {
     for (int j = 0; j < h; j++)
     {
-      if (colors[i][j] == "blue")
-      {
-        colors[i][j] = "cyan";
-      }
-      if (colors[i][j] == "red")
-      {
-        colors[i][j] = "magenta";
-      }
+      if (colors[i][j] == "blue") colors[i][j] = "cyan";
+      if (colors[i][j] == "red") colors[i][j] = "magenta";
     }
   }
 }

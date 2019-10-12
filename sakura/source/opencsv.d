@@ -29,25 +29,3 @@ int[20][20] evalcsv(string eval_head){
   }
   return (eval);
 }
-
-int[20][20] pointscsv(string points_head){
-
-  range_begin = 0;
-  range_end = 0;
-  int[20][20] points;
-  string pts = readText(points_head ~ ".csv");
-
-  // 仮にフィールドが width = 10 , hight = 10 とする
-  w = 10;
-  h = 10;
-
-  // 評価値を配列に格納する
-  for (int i = 0; i < w; i++){
-    for (int j = 0; j < h; j++){
-      while (pts[range_end] != ',') range_end++;
-      points[i][j] = to!(int)(pts[range_begin..range_end]);
-      range_begin = ++range_end;
-    }
-  }
-  return (points);
-}
