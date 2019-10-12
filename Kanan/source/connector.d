@@ -44,6 +44,30 @@ class KananConnector {
     socket.close();
   }
 
+  void sendHumanResult(Actions[] agentData)
+  {
+    auto socket = new TcpSocket(new InternetAddress(ip, port));
+
+    socket.send("gg ");
+
+    string sendData;
+
+    foreach (i; 0 .. agentData.length) {
+      sendData ~= agentData[i].agentID.to!string;
+      sendData ~= " ";
+      sendData ~= agentData[i].type;
+      sendData ~= " ";
+      sendData ~= agentData[i].dx.to!string;
+      sendData ~= " ";
+      sendData ~= agentData[i].dy.to!string;
+      sendData ~= ";";
+    }
+
+    writeln(sendData);
+    socket.send(sendData);
+    socket.close();
+  }
+
   void sendResult(Actions[] agentData)
   {
     auto socket = new TcpSocket(new InternetAddress(ip, port));

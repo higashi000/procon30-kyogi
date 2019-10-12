@@ -17,7 +17,23 @@ void disp(Field nowField) {
 
     write("|");
     foreach (j; 0 .. nowField.height) {
-      dispTile(nowField.point[i][j], nowField.color[i][j], nowField.myTeamID);
+      auto flg = false;
+      myLoop : foreach (k; nowField.myAgentData) {
+        if (i == k[2] && j == k[1]) {
+          writef("\033[0;45m%3d\033[0;39m", k[0]);
+          flg = true;
+          break myLoop;
+        }
+      }
+      rivalLoop : foreach (k; nowField.rivalAgentData) {
+        if (i == k[2] && j == k[1]) {
+          writef("\033[0;46m%3d\033[0;39m", k[0]);
+          flg = true;
+          break rivalLoop;
+        }
+      }
+      if (!flg)
+        dispTile(nowField.point[i][j], nowField.color[i][j], nowField.myTeamID);
       write("|");
     }
     writeln;
