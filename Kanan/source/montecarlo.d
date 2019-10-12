@@ -512,7 +512,7 @@ class MontecarloTreeSearch {
     auto cn = root.triedNode;
 
     foreach (e; cn) {
-      e.ucb = (e.winCnt / e.cntPlayOut) + (e.checkRemove) * sqrt(cast(double)(log(allPlayOutCnt) / e.cntPlayOut)));
+      e.ucb = (e.winCnt / e.cntPlayOut) + (e.checkRemove) * sqrt(cast(double)(log(allPlayOutCnt) / e.cntPlayOut));
     }
 
     auto top = maxElement!("a.ucb")(cn);
