@@ -10,6 +10,7 @@ import (
   "strconv"
   "net/http"
   "strings"
+  "time"
   "flag"
 )
 
@@ -42,8 +43,10 @@ type Action struct {
 
 var myTeamID int
 var maxTurn string
+var thinkingTime int
 
 func main() {
+  starttUnixTime := time.Now().Unix()
   flag.Parse()
   args := flag.Args()
 
@@ -51,6 +54,7 @@ func main() {
 
   myTeamID, _ = strconv.Atoi(args[2])
   maxTurn = args[3]
+  thinkingTime, _ = strconv.Atoi(args[5])
   serverAddress := args[0] + ":" + args[1]
   fmt.Println(serverAddress)
 
@@ -65,13 +69,22 @@ func main() {
   cntConect = 0
 
   for {
-    connectClient(listener, args[4], &cntConect)
-    go connectClient(listener, args[4], &cntConect)
+    connectClient(listener, args[4], &cntConect, &starttUnixTime)
+//    go connectClient(listener, args[4], &cntConect )
   }
 }
 
-func connectClient(listener net.Listener, serverPORT string, cntConect *int) {
+func connectClient(listener net.Listener, serverPORT string, cntConect *int, starttUnixTime *int64) {
   conn, err := listener.Accept()
+
+  for {
+    nowTime := time.Now().Unix()
+    if int64(thinkingTime) + *starttUnixTime <= nowTime {
+      break
+    }
+  }
+
+  *starttUnixTime = time.Now().Unix()
 
   if err != nil {
     fmt.Println("error")
