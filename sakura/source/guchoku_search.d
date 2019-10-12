@@ -6,8 +6,7 @@ import std.stdio;
 import std.file;
 import std.container;
 
-import sakura.opencsv;
-
+int range_begin, range_end;
 int[20][20] eval;
 int[20][20] points;
 
@@ -18,6 +17,34 @@ int[10] my_age_x = 0, my_age_y = 0;
 int[10] teki_age_x  = 0, teki_age_y = 0;
 int w = 10, h = 10;
 int[10] ans = 11;
+string[20][20] colors = [["white","white","white","white","white","white","white","white","white","white"],
+                          ["white","white","white","white","white","white","white","white","white","white"],
+                          ["white","white","white","white","white","white","white","white","white","white"],
+                          ["white","white","white","white","white","white","white","white","white","white"],
+                          ["white","white","white","white","white","white","white","white","white","white"],
+                          ["white","white","white","white","white","white","white","white","white","white"],
+                          ["white","white","white","white","white","white","white","white","white","white"],
+                          ["white","white","white","white","white","white","white","white","white","white"],
+                          ["white","white","white","white","white","white","white","white","white","white"],
+                          ["white","white","white","white","white","white","white","white","white","white"]];
+
+int[20][20] evalcsv(string eval_head){
+
+  range_begin = 0;
+  range_end = 0;
+  int[20][20] eval;
+  string evl = readText("./評価値/" ~ eval_head ~ ".csv");
+
+  // 評価値を配列に格納する
+  for (int i = 0; i < w; i++){
+    for (int j = 0; j < h; j++){
+      while (evl[range_end] != ',') range_end++;
+      eval[i][j] = to!(int)(evl[range_begin..range_end]);
+      range_begin = ++range_end;
+    }
+  }
+  return (eval);
+}
 
 void guchoku_first_search()
 {
@@ -319,7 +346,7 @@ string guchoku_search(){
             writef ("\x1b[39m");
             break;
           }
-          writef ("%3d", points[i][j]);
+          writef ("%3d", eval[i][j]);
           writef ("\x1b[49m");
           writef ("\x1b[39m");
         }
