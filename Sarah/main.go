@@ -6,8 +6,9 @@ import (
   "io/ioutil"
   "log"
   "encoding/json"
-  "math/rand"
-  "time"
+//  "math/rand"
+//  "time"
+  "flag"
 )
 
 type FieldData struct {
@@ -63,11 +64,17 @@ func getFieldData() FieldData {
 }
 
 func main() {
+  flag.Parse()
+  args := flag.Args()
+  isHumanPower := false
+  if len(args) > 0 {
+    isHumanPower = true
+  }
   r := gin.Default()
   field := getFieldData()
   fmt.Println(field)
   sendFieldData(r, field)
-  rsvActionData(r, &field)
+  rsvActionData(r, &field, isHumanPower)
   r.Run()
 }
 
@@ -78,7 +85,7 @@ func sendFieldData(r *gin.Engine, field FieldData) {
       })
 }
 
-func rsvActionData(r *gin.Engine, field *FieldData) {
+func rsvActionData(r *gin.Engine, field *FieldData, isHumanPower bool) {
   var actions Actions
   r.POST("/matches/:id/action", func(c *gin.Context) {
       c.BindJSON(&actions)
@@ -88,23 +95,45 @@ func rsvActionData(r *gin.Engine, field *FieldData) {
         field.Teams[1].Agents[i].X = field.Teams[1].Agents[i].X
         field.Teams[1].Agents[i].Y = field.Teams[1].Agents[i].Y
       }
-      updateFieldData(field, actions, 1)
-      dx := []int{-1, -1, 0, 1, 1, 1, 0, -1};
-      dy := []int{0, -1, -1, -1, 0, 1, 1, 1};
-
-      rand.Seed(time.Now().UnixNano())
-      var randAction Actions
-      for i := 0; i < len(field.Teams[0].Agents); i++ {
-        var tmp Action
-        tmp.AgentID = 0
-        tmp.Type = "move"
-        dir := rand.Intn(8)
-        tmp.Dx = dx[dir]
-        tmp.Dy = dy[dir]
-        randAction.AgentActions = append(randAction.AgentActions, tmp)
+      fmt.Println(actions)
+      if actions.AgentActions[0].AgentID == 4 {
+        updateFieldData(field, actions, 2)
+      } else {
+        updateFieldData(field, actions, 1)
       }
+      // dx := []int{-1, -1, 0, 1, 1, 1, 0, -1};
+      // dy := []int{0, -1, -1, -1, 0, 1, 1, 1};
+      // if !isHumanPower {
+      //   rand.Seed(time.Now().UnixNano())
+      //   var randAction Actions
+      //   for i := 0; i < len(field.Teams[0].Agents); i++ {
+      //     var tmp Action
+      //     tmp.AgentID = 0
+      //     tmp.Type = "move"
+      //     dir := rand.Intn(8)
+      //     tmp.Dx = dx[dir]
+      //     tmp.Dy = dy[dir]
+      //     randAction.AgentActions = append(randAction.AgentActions, tmp)
+      //   }
+      //   updateFieldData(field, randAction, 2);
+      // } else {
+      //   var humanAction Actions
+      //   ageID := 4
+      //   for i := 0; i < len(field.Teams[0].Agents); i++ {
+      //     var tmp Action
+      //
+      //     tmp.AgentID = ageID
+      //     var tmpAgeMove int
+      //     fmt.Printf("エージェント%dの動き >> ", ageID)
+      //     fmt.Scan(&tmpAgeMove)
+      //     tmp.Dx = dx[tmpAgeMove]
+      //     tmp.Dy = dy[tmpAgeMove]
+      //     humanAction.AgentActions = append(humanAction.AgentActions, tmp)
+      //     ageID++
+      //   }
+      //   updateFieldData(field, humanAction, 2);
+      // }
 
-      updateFieldData(field, randAction, 2);
   })
 }
 
@@ -119,9 +148,6 @@ func checkDuplicate(whichTeam bool, tmpPos [][]int, agentNum int, field FieldDat
           if j < agentNum {
             tmpPos[j][0] = field.Teams[0].Agents[j].X - 1
             tmpPos[j][1] = field.Teams[0].Agents[j].Y - 1
-          } else if agentNum <= j && j < agentNum * 2 {
-            tmpPos[j + agentNum][0] = field.Teams[1].Agents[j].X - 1
-            tmpPos[j + agentNum][1] = field.Teams[1].Agents[j].Y - 1
           }
         }
       }
