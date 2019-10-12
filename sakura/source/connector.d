@@ -6,7 +6,7 @@ import sakura.field;
 import std.socket;
 import std.conv;
 import std.stdio;
-import std.string : split;
+import std.string;
 
 class sakuraConnector {
 
