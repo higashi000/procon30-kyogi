@@ -194,7 +194,7 @@ struct MCTSNode {
     }
     this.field = Field(field, this.myMoveDir, whichMove);
 
-    this.field.moveAgent(this.myMoveDir, true);
+    this.field.moveAgent(this.myMoveDir, whichMove);
     this.field.calcTilePoint();
     this.field.calcMyAreaPoint();
     this.field.calcRivalAreaPoint();
@@ -232,6 +232,22 @@ struct MCTSNode {
   uint whichMove;
   double ucb;
   bool win;
+
+  double calcPosPoint()
+  {
+    int agePosPoint;
+    int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
+    int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
+    foreach (i; 0 .. field.agentNum) {
+      if ((field.myAgentData[i][2] - dy[myMoveDir[i]]) == (field.myAgentData[i][2]) &&
+          (field.myAgentData[i][1] - dx[myMoveDir[i]]) == (field.myAgentData[i][1]))
+        agePosPoint += 0;
+      else
+        agePosPoint += field.point[field.myAgentData[i][1]][field.myAgentData[i][0]];
+    }
+
+    return to!double(agePosPoint);
+  }
 
   MCTSNode* playOut(MCTSNode nextNode, int maxTurn)
   {
@@ -478,7 +494,7 @@ class MontecarloTreeSearch {
     auto cn = root.triedNode;
 
     foreach (e; cn) {
-      e.ucb = (e.winCnt / e.cntPlayOut) + (sqrt(2.0) * sqrt(cast(double)(log(allPlayOutCnt) / e.cntPlayOut)));
+      e.ucb = (e.winCnt / e.cntPlayOut) + ((sqrt(2.0) + e.calcPosPoint) * sqrt(cast(double)(log(allPlayOutCnt) / e.cntPlayOut)));
     }
 
     auto top = maxElement!("a.ucb")(cn);
