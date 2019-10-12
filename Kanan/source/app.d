@@ -1,5 +1,6 @@
-import std.stdio, std.conv;
-import Kanan.field, Kanan.montecarlo, Kanan.beamSearch, Kanan.connector;
+import std.stdio, std.conv, std.string, std.array;
+import Kanan.field, Kanan.dispField, Kanan.montecarlo, Kanan.beamSearch, Kanan.connector, Kanan.sendData;
+import core.thread;
 
 // コマンドライン引数にMariのip,port,試合の最大ターン数をつけて
 void main(string[] args)
@@ -13,19 +14,26 @@ void main(string[] args)
     connector.getFieldData();
     auto field = connector.parseFieldData();
     writeln(turn);
+    disp(field);
+    writeln;
+    field.calcTilePoint;
+    field.calcMyAreaPoint;
+    field.calcRivalAreaPoint;
 
-    if (turn < maxTurn / 2) {
-      auto beamSearch = new KananBeamSearch(field, turn, maxTurn, 20, 9 ^^ 3);
-      beamSearch.searchAgentAction();
-      auto answer = beamSearch.bestAnswer();
-      connector.sendResult(answer);
-    } else {
-      auto montecarlo = new Montecarlo(field, turn, maxTurn, 4500, 20);
-      auto answer = montecarlo.bestAnswer();
+    writeln(field.myTilePoint + field.myAreaPoint);
+    writeln(field.rivalTilePoint + field.rivalAreaPoint);
 
-      connector.sendResult(answer);
-    }
+    auto montecarlo = new MontecarloTreeSearch(field, turn, maxTurn, 4500, 20);
+    auto answer = montecarlo.playGame();
+    connector.sendResult(answer);
+
 
     turn++;
   }
+  auto field = connector.parseFieldData();
+  disp(field);
+  writeln;
+  field.calcTilePoint;
+  field.calcMyAreaPoint;
+  field.calcRivalAreaPoint;
 }

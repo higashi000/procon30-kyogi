@@ -7,7 +7,7 @@ struct Field {
   import std.stdio : writeln;
   import std.algorithm : copy;
 
-  this(Field field, int[] myMoveDir) {
+  this(Field field, int[] myMoveDir, bool whichTeam) {
     this.myMoveDir = new int[myMoveDir.length];
     foreach (i; 0 .. myMoveDir.length) {
       this.myMoveDir[i] = myMoveDir[i];
@@ -39,8 +39,7 @@ struct Field {
     }
     this.rivalTeamID = field.rivalTeamID;
 
-    moveMyAgent();
-    moveRivlAgent();
+    moveAgent(myMoveDir, whichTeam);
     calcTilePoint();
     calcMyAreaPoint();
     calcRivalAreaPoint();
@@ -94,109 +93,72 @@ struct Field {
 
 
 // エージェントの移動 {{{
-  void moveMyAgent()
+  void moveAgent(int[] dir, bool whichTeam)
   {
-    import std.random : uniform;
-    import std.stdio : writeln;
-    int[][] tmpAgentPos = new int[][](agentNum, 2);
+    if (whichTeam) {
+      int[][] tmpAgentPos = new int[][](agentNum, 2);
 
-    // 現時点での移動先設定
-    foreach (i; 0 .. agentNum) {
-      // 自分のエージェント
-      tmpAgentPos[i][0] = myAgentData[i][1] + dx[myMoveDir[i]];
-      tmpAgentPos[i][1] = myAgentData[i][2] + dy[myMoveDir[i]];
-      if (tmpAgentPos[i][0] < 0 || width <= tmpAgentPos[i][0]) {
-        tmpAgentPos[i][0] = myAgentData[i][1];
-        tmpAgentPos[i][1] = myAgentData[i][2];
-      } else if (tmpAgentPos[i][1] < 0 || height <= tmpAgentPos[i][1]) {
-        tmpAgentPos[i][0] = myAgentData[i][1];
-        tmpAgentPos[i][1] = myAgentData[i][2];
+      foreach (i; 0 .. agentNum) {
+        tmpAgentPos[i][0] = myAgentData[i][1] + dx[dir[i]];
+        tmpAgentPos[i][1] = myAgentData[i][2] + dy[dir[i]];
+
+        if (tmpAgentPos[i][0] < 0 || width <= tmpAgentPos[i][0]) {
+          tmpAgentPos[i][0] = myAgentData[i][1];
+          tmpAgentPos[i][1] = myAgentData[i][2];
+        } else if (tmpAgentPos[i][1] < 0 || height <= tmpAgentPos[i][1]) {
+          tmpAgentPos[i][0] = myAgentData[i][1];
+          tmpAgentPos[i][1] = myAgentData[i][2];
+        }
+
+        if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == rivalTeamID)
+          tmpAgentPos ~= [myAgentData[i][1], myAgentData[i][2]];
       }
 
-      if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == rivalTeamID) {
-        int[] tmp = [myAgentData[i][1], myAgentData[i][2]];
-        tmpAgentPos ~= tmp;
+      checkDuplicate(true, tmpAgentPos);
+      checkDuplicate(true, tmpAgentPos);
+
+      foreach (i; 0 .. agentNum) {
+        if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == rivalTeamID) {
+          color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] = 0;
+        } else {
+          myAgentData[i][1] = tmpAgentPos[i][0];
+          myAgentData[i][2] = tmpAgentPos[i][1];
+          color[myAgentData[i][2]][myAgentData[i][1]] = myTeamID;
+        }
       }
-    }
+    } else {
+      int[][] tmpAgentPos = new int[][](agentNum, 2);
 
-    checkDuplicate(true, tmpAgentPos);
-    checkDuplicate(true, tmpAgentPos);
+      foreach (i; 0 .. agentNum) {
+        tmpAgentPos[i][0] = rivalAgentData[i][1] + dx[dir[i]];
+        tmpAgentPos[i][1] = rivalAgentData[i][2] + dy[dir[i]];
 
-// エージェントがフィルード外に行かないようにする --- {{{
-    foreach (i; 0 .. agentNum) {
-      if ((tmpAgentPos[i][0] < 0) || (width <= tmpAgentPos[i][0])) {
-        tmpAgentPos[i][0] = myAgentData[i][1];
-        tmpAgentPos[i][1] = myAgentData[i][2];
-      } else if ((tmpAgentPos[i][1] < 0) || (height <= tmpAgentPos[i][1])) {
-        tmpAgentPos[i][0] = myAgentData[i][1];
-        tmpAgentPos[i][1] = myAgentData[i][2];
+        if (tmpAgentPos[i][0] < 0 || width <= tmpAgentPos[i][0]) {
+          tmpAgentPos[i][0] = myAgentData[i][1];
+          tmpAgentPos[i][1] = myAgentData[i][2];
+        } else if (tmpAgentPos[i][1] < 0 || height <= tmpAgentPos[i][1]) {
+          tmpAgentPos[i][0] = myAgentData[i][1];
+          tmpAgentPos[i][1] = myAgentData[i][2];
+        }
+
+        if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == myTeamID)
+          tmpAgentPos ~= [rivalAgentData[i][1], rivalAgentData[i][2]];
       }
-    }
-// }}}
 
-    foreach (i; 0 .. agentNum) {
-      if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == rivalTeamID) {
-        color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] = 0;
-      } else {
-        myAgentData[i][1] = tmpAgentPos[i][0];
-        myAgentData[i][2] = tmpAgentPos[i][1];
-        color[myAgentData[i][2]][myAgentData[i][1]] = myTeamID;
+      checkDuplicate(false, tmpAgentPos);
+      checkDuplicate(false, tmpAgentPos);
+
+      foreach (i; 0 .. agentNum) {
+        if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == myTeamID) {
+          color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] = 0;
+        } else {
+          rivalAgentData[i][1] = tmpAgentPos[i][0];
+          rivalAgentData[i][2] = tmpAgentPos[i][1];
+          color[rivalAgentData[i][2]][rivalAgentData[i][1]] = rivalTeamID;
+        }
       }
     }
   }
-
-  void moveRivlAgent()
-  {
-    import std.random : uniform;
-    import std.stdio : writeln;
-    int[][] tmpAgentPos = new int[][](agentNum, 2);
-
-    // 現時点での移動先設定
-    foreach (i; 0 .. agentNum) {
-      // 自分のエージェント
-      tmpAgentPos[i][0] = rivalAgentData[i][1] + dx[uniform(1, 9)];
-      tmpAgentPos[i][1] = rivalAgentData[i][2] + dy[uniform(1, 9)];
-      if (tmpAgentPos[i][0] < 0 || width <= tmpAgentPos[i][0]) {
-        tmpAgentPos[i][0] = rivalAgentData[i][1];
-        tmpAgentPos[i][1] = rivalAgentData[i][2];
-      } else if (tmpAgentPos[i][1] < 0 || height <= tmpAgentPos[i][1]) {
-        tmpAgentPos[i][0] = rivalAgentData[i][1];
-        tmpAgentPos[i][1] = rivalAgentData[i][2];
-      }
-
-      if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == myTeamID) {
-        int[] tmp = [rivalAgentData[i][1], rivalAgentData[i][2]];
-        tmpAgentPos ~= tmp;
-      }
-    }
-
-    checkDuplicate(false, tmpAgentPos);
-    checkDuplicate(false, tmpAgentPos);
-
-// エージェントがフィルード外に行かないようにする --- {{{
-    foreach (i; 0 .. agentNum) {
-      if ((tmpAgentPos[i][0] < 0) || (width <= tmpAgentPos[i][0])) {
-        tmpAgentPos[i][0] = rivalAgentData[i][1];
-        tmpAgentPos[i][1] = rivalAgentData[i][2];
-      } else if ((tmpAgentPos[i][1] < 0) || (height <= tmpAgentPos[i][1])) {
-        tmpAgentPos[i][0] = rivalAgentData[i][1];
-        tmpAgentPos[i][1] = rivalAgentData[i][2];
-      }
-    }
-// }}}
-
-    foreach (i; 0 .. agentNum) {
-      if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == myTeamID) {
-        color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] = 0;
-      } else {
-        rivalAgentData[i][1] = tmpAgentPos[i][0];
-        rivalAgentData[i][2] = tmpAgentPos[i][1];
-        color[rivalAgentData[i][2]][rivalAgentData[i][1]] = rivalTeamID;
-      }
-    }
-  }
-
-
 
   // 移動先の重複確認
   // 重複があった場合は元の場所に戻す

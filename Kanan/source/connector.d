@@ -30,7 +30,7 @@ class KananConnector {
   {
     auto socket = new TcpSocket(new InternetAddress(ip, port));
 
-    socket.send("1f");
+    socket.send("sf");
 
     ubyte[4018] rsvData;
     ulong size = socket.receive(rsvData);
@@ -41,6 +41,30 @@ class KananConnector {
 
     writeln(fieldData);
 
+    socket.close();
+  }
+
+  void sendHumanResult(Actions[] agentData)
+  {
+    auto socket = new TcpSocket(new InternetAddress(ip, port));
+
+    socket.send("gg ");
+
+    string sendData;
+
+    foreach (i; 0 .. agentData.length) {
+      sendData ~= agentData[i].agentID.to!string;
+      sendData ~= " ";
+      sendData ~= agentData[i].type;
+      sendData ~= " ";
+      sendData ~= agentData[i].dx.to!string;
+      sendData ~= " ";
+      sendData ~= agentData[i].dy.to!string;
+      sendData ~= ";";
+    }
+
+    writeln(sendData);
+    socket.send(sendData);
     socket.close();
   }
 
@@ -63,7 +87,9 @@ class KananConnector {
       sendData ~= ";";
     }
 
+    writeln(sendData);
     socket.send(sendData);
+    socket.close();
   }
 
   Field parseFieldData()
