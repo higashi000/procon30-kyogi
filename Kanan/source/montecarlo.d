@@ -233,6 +233,24 @@ struct MCTSNode {
   double ucb;
   bool win;
 
+  double checkRemove()
+  {
+    double removePoint = 0.0;
+    int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
+    int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
+    foreach (i; 0 .. field.agentNum) {
+      if (field.myAgentData[i][2] + dy[myMoveDir[i]] < 0 || field.height <= field.myAgentData[i][2] + dy[myMoveDir[i]]) {
+        continue;
+      } else if (field.myAgentData[i][1] + dx[myMoveDir[i]] < 0 || field.width <= field.myAgentData[i][1] + dx[myMoveDir[i]]) {
+        continue;
+      }
+      if (field.color[field.myAgentData[i][2] + dy[myMoveDir[i]]][field.myAgentData[i][1] + dx[myMoveDir[i]]] == 0) {
+        removePoint += 10.0;
+      }
+    }
+    return removePoint;
+  }
+
   double calcPosPoint()
   {
     int agePosPoint;
@@ -494,7 +512,7 @@ class MontecarloTreeSearch {
     auto cn = root.triedNode;
 
     foreach (e; cn) {
-      e.ucb = (e.winCnt / e.cntPlayOut) + ((sqrt(2.0) + e.calcPosPoint) * sqrt(cast(double)(log(allPlayOutCnt) / e.cntPlayOut)));
+      e.ucb = (e.winCnt / e.cntPlayOut) + (e.checkRemove) * sqrt(cast(double)(log(allPlayOutCnt) / e.cntPlayOut)));
     }
 
     auto top = maxElement!("a.ucb")(cn);
