@@ -54,6 +54,7 @@ func main() {
 
   myTeamID, _ = strconv.Atoi(args[2])
   maxTurn = args[3]
+  matchID = args[6]
   thinkingTime, _ = strconv.Atoi(args[5])
   serverAddress := args[0] + ":" + args[1]
   fmt.Println(serverAddress)
@@ -69,12 +70,12 @@ func main() {
   cntConect = 0
 
   for {
-    connectClient(listener, args[4], &cntConect, &starttUnixTime)
+    connectClient(listener, args[4], &cntConect, &starttUnixTime, matchID)
 //    go connectClient(listener, args[4], &cntConect )
   }
 }
 
-func connectClient(listener net.Listener, serverPORT string, cntConect *int, starttUnixTime *int64) {
+func connectClient(listener net.Listener, serverPORT string, cntConect *int, starttUnixTime *int64, matchID string) {
   conn, err := listener.Accept()
 
   *starttUnixTime = time.Now().Unix()
@@ -98,7 +99,7 @@ func connectClient(listener net.Listener, serverPORT string, cntConect *int, sta
     case "gf" :
       conn.Write([]byte(convertJsonToSendDataForGUI()))
     case "2s" :
-      rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT)
+      rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT, matchID)
     case "2g" :
       rsvGUIData(cntConect, string(rsvData[3:n]), serverPORT)
     case "gg" :
@@ -130,7 +131,7 @@ func rsvHumanData(cntConect *int, rsvData string, port string) {
 
 
 
-func rsvSolverData(cntConect *int, rsvData string, port string) {
+func rsvSolverData(cntConect *int, rsvData string, port string, matchID string) {
 
   answer := make([]Action, 0)
 
@@ -147,7 +148,7 @@ func rsvSolverData(cntConect *int, rsvData string, port string) {
     answer = append(answer, Action{agentID, moveType, dx, dy})
   }
 
-  sendResult(answer, port, "1")
+  sendResult(answer, port, matchID)
   *cntConect = 0;
 }
 
