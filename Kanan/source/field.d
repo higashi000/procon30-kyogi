@@ -41,9 +41,9 @@ struct Field {
     this.moveType = new string[field.agentNum];
 
 //   moveAgent(myMoveDir, whichTeam);
-    calcTilePoint();
-    calcMyAreaPoint();
-    calcRivalAreaPoint();
+    /* calcTilePoint(); */
+    /* calcMyAreaPoint(); */
+    /* calcRivalAreaPoint(); */
   }
 
   this(Field field) {
@@ -64,9 +64,9 @@ struct Field {
     this.rivalAgentData = field.rivalAgentData;
     this.moveType = new string[field.agentNum];
 
-    calcTilePoint();
-    calcMyAreaPoint();
-    calcRivalAreaPoint();
+    /* calcTilePoint(); */
+    /* calcMyAreaPoint(); */
+    /* calcRivalAreaPoint(); */
   }
 
   int[] myMoveDir;
