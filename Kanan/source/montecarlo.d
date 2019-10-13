@@ -193,7 +193,6 @@ struct MCTSNode {
         this.myMoveDir[i] = myMoveDir[i];
     }
     this.field = Field(field, this.myMoveDir, whichMove);
-
     this.field.moveAgent(this.myMoveDir, whichMove);
     this.field.calcTilePoint();
     this.field.calcMyAreaPoint();
@@ -543,20 +542,9 @@ loop: while (Clock.currTime - st <= thinkingTime.msecs) {
 
       Actions[] answer;
 
+        writeln(topNode.field.moveType);
       foreach (i; 0 .. topNode.field.agentNum) {
-        writeln(topNode.myMoveDir);
-        writeln(topNode.field.myAgentData[i][1] + dx[topNode.myMoveDir[i]]);
-        writeln(topNode.field.myAgentData[i][2] + dy[topNode.myMoveDir[i]]);
-        string movePattern = "move";
-        if (topNode.field.color[topNode.field.myAgentData[i][2]][topNode.field.myAgentData[i][1]] == topNode.field.rivalTeamID)
-          movePattern = "remove";
-        else if ((topNode.field.myAgentData[i][2] - dy[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][2]) &&
-            (topNode.field.myAgentData[i][1] - dx[topNode.myMoveDir[i]]) == (topNode.field.myAgentData[i][1]))
-          movePattern = "stay";
-        else
-          movePattern = "move";
-
-        answer ~= Actions(topNode.field.myAgentData[i][0], movePattern, dx[topNode.myMoveDir[i]], dy[topNode.myMoveDir[i]]);
+        answer ~= Actions(topNode.field.myAgentData[i][0], topNode.field.moveType[i], dx[topNode.myMoveDir[i]], dy[topNode.myMoveDir[i]]);
       }
 
       return answer;
@@ -618,12 +606,8 @@ unittest {
   uint maxTurn = 10;
   uint trial = 1000;
 
-  StopWatch sw;
-  sw.start();
-  auto search = new Montecarlo(field, turn, maxTurn, trial);
-  auto topNode = search.playGame();
-  topNode.childEval.writeln;
-  sw.stop();
-  sw.peek.msecs.writeln;
+  auto search = new MontecarloTreeSearch(field, turn, maxTurn, 1000, 20);
+  auto answer = search.playGame();
+  writeln(answer);
 }
 //}}}

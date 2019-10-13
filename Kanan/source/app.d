@@ -23,8 +23,9 @@ void main(string[] args)
     writeln(field.myTilePoint + field.myAreaPoint);
     writeln(field.rivalTilePoint + field.rivalAreaPoint);
 
-    auto montecarlo = new MontecarloTreeSearch(field, turn, maxTurn, 4500, 20);
+    auto montecarlo = new MontecarloTreeSearch(field, turn, maxTurn, 1000, 20);
     auto answer = montecarlo.playGame();
+    writeln(answer);
     connector.sendResult(answer);
 
 
