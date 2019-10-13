@@ -82,12 +82,12 @@ func rsvActionData(r *gin.Engine, field *FieldData) {
   var actions Actions
   r.POST("/matches/:id/action", func(c *gin.Context) {
       c.BindJSON(&actions)
-      for i := 0; i < len(field.Teams[0].Agents); i++ {
-        field.Teams[0].Agents[i].X = field.Teams[0].Agents[i].X
-        field.Teams[0].Agents[i].Y = field.Teams[0].Agents[i].Y
-        field.Teams[1].Agents[i].X = field.Teams[1].Agents[i].X
-        field.Teams[1].Agents[i].Y = field.Teams[1].Agents[i].Y
-      }
+      // for i := 0; i < len(field.Teams[0].Agents); i++ {
+      //   field.Teams[0].Agents[i].X = field.Teams[0].Agents[i].X
+      //   field.Teams[0].Agents[i].Y = field.Teams[0].Agents[i].Y
+      //   field.Teams[1].Agents[i].X = field.Teams[1].Agents[i].X
+      //   field.Teams[1].Agents[i].Y = field.Teams[1].Agents[i].Y
+      // }
       updateFieldData(field, actions, 1)
       dx := []int{-1, -1, 0, 1, 1, 1, 0, -1};
       dy := []int{0, -1, -1, -1, 0, 1, 1, 1};
@@ -119,9 +119,6 @@ func checkDuplicate(whichTeam bool, tmpPos [][]int, agentNum int, field FieldDat
           if j < agentNum {
             tmpPos[j][0] = field.Teams[0].Agents[j].X - 1
             tmpPos[j][1] = field.Teams[0].Agents[j].Y - 1
-          } else if agentNum <= j && j < agentNum * 2 {
-            tmpPos[j + agentNum][0] = field.Teams[1].Agents[j].X - 1
-            tmpPos[j + agentNum][1] = field.Teams[1].Agents[j].Y - 1
           }
         }
       }
