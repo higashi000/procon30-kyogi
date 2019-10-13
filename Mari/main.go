@@ -95,9 +95,9 @@ func connectClient(listener net.Listener, serverPORT string, cntConect *int, sta
   fmt.Println(string(rsvData))
   switch string(rsvData[0:2]) {
     case "sf" :
-      conn.Write([]byte(convertJsonToSendData()))
+      conn.Write([]byte(convertJsonToSendData(matchID, serverPORT)))
     case "gf" :
-      conn.Write([]byte(convertJsonToSendDataForGUI()))
+      conn.Write([]byte(convertJsonToSendDataForGUI(matchID, serverPORT)))
     case "2s" :
       rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT, matchID)
     case "2g" :
@@ -181,8 +181,10 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 
   fmt.Println(sendMoveInform)
 
-  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID + "/action"
-  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
+//  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID + "/action"
+  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
+//  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
+  procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest(
     "POST",
@@ -208,8 +210,11 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
-  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + "260"
-  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
+//  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID
+  procon30RequestUrl := "http://127.0.0.1:" + port + "/matches/"  + matchID
+  fmt.Println(procon30RequestUrl)
+//  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
+  procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest("GET", procon30RequestUrl, nil)
   if err != nil {
@@ -351,12 +356,14 @@ func integrationArea(field FieldData) [][]int {
 }
 
 // Jsonをsolverに送るために変換 {{{
-func convertJsonToSendData() string {
+func convertJsonToSendData(matchID string, serverPORT string) string {
   var fieldData FieldData
 
   var rsvData []byte
 
-  requestFieldData("508", "80", &rsvData)
+  requestFieldData(matchID, serverPORT, &rsvData)
+
+  fmt.Println(string(rsvData))
 
   if err := json.Unmarshal(rsvData, &fieldData); err != nil {
     log.Fatal(err)
@@ -398,7 +405,8 @@ func convertJsonToSendData() string {
   }
   convertData += "\n"
 
-  convertData += strconv.Itoa(len(fieldData.Teams[1].Agents))
+  agentNum := len(fieldData.Teams[0].Agents)
+  convertData += strconv.Itoa(agentNum)
   convertData += "\n"
 
   if fieldData.Teams[0].TeamID == myTeamID {
@@ -448,12 +456,12 @@ func convertJsonToSendData() string {
 }
 //}}}
 // JsonをGUIに送るために変換 {{{
-func convertJsonToSendDataForGUI() string {
+func convertJsonToSendDataForGUI(matchID string, serverPORT string) string {
   var fieldData FieldData
 
   var rsvData []byte
 
-  requestFieldData("1", "8080", &rsvData)
+  requestFieldData(matchID, serverPORT, &rsvData)
 
   fmt.Println("aaa");
   if err := json.Unmarshal(rsvData, &fieldData); err != nil {
