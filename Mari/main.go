@@ -77,13 +77,6 @@ func main() {
 func connectClient(listener net.Listener, serverPORT string, cntConect *int, starttUnixTime *int64) {
   conn, err := listener.Accept()
 
-  for {
-    nowTime := time.Now().Unix()
-    if int64(thinkingTime) + *starttUnixTime <= nowTime {
-      break
-    }
-  }
-
   *starttUnixTime = time.Now().Unix()
 
   if err != nil {
@@ -190,8 +183,8 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 
   fmt.Println(sendMoveInform)
 
-  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
-  procon30Token := "procon30_example_token"
+  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID + "/action"
+  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
 
   req, err := http.NewRequest(
     "POST",
@@ -212,11 +205,13 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
   fmt.Println(resp);
 
   defer resp.Body.Close()
+
+  time.Sleep(1500 * time.Millisecond)
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
-  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID
-  procon30Token := "procon30_example_token"
+  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID
+  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
 
   req, err := http.NewRequest("GET", procon30RequestUrl, nil)
   if err != nil {
