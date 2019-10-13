@@ -248,6 +248,30 @@ struct MCTSNode {
     return to!double(agePosPoint);
   }
 
+  double checkStay()
+  {
+    int stayCnt;
+    int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
+    int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
+    foreach (i; 0 .. field.agentNum) {
+      if (myMoveDir[i] == 0)
+        stayCnt -= 3;
+    }
+    return to!double(stayCnt);
+  }
+  double checkMinus()
+  {
+    int minusPoint;
+    int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
+    int[] dy = [0, 0, -1, -1, -1, 0, 1, 1, 1];
+    foreach (i; 0 .. field.agentNum) {
+      if (field.point[field.myAgentData[i][2]][field.myAgentData[i][1]] < 0)
+        minusPoint -= 1;
+    }
+    return to!double(minusPoint);
+  }
+
+
   MCTSNode* playOut(MCTSNode nextNode, int maxTurn)
   {
     if (nextNode.turn <= maxTurn) {
@@ -493,7 +517,7 @@ class MontecarloTreeSearch {
     auto cn = root.triedNode;
 
     foreach (e; cn) {
-      e.ucb = (e.winCnt / e.cntPlayOut) + ((sqrt(2.0) + e.calcPosPoint) * sqrt(cast(double)(log(allPlayOutCnt) / e.cntPlayOut)));
+      e.ucb = (e.winCnt / e.cntPlayOut) + (sqrt(2.0) + e.checkStay + e.checkMinus + e.calcPosPoint) * sqrt(cast(double)(log(allPlayOutCnt) / e.cntPlayOut));
     }
 
     auto top = maxElement!("a.ucb")(cn);
@@ -542,7 +566,7 @@ loop: while (Clock.currTime - st <= thinkingTime.msecs) {
 
       Actions[] answer;
 
-        writeln(topNode.field.moveType);
+      writeln(topNode.field.moveType);
       foreach (i; 0 .. topNode.field.agentNum) {
         answer ~= Actions(topNode.field.myAgentData[i][0], topNode.field.moveType[i], dx[topNode.myMoveDir[i]], dy[topNode.myMoveDir[i]]);
       }
