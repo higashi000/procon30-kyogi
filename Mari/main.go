@@ -181,10 +181,10 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 
   fmt.Println(sendMoveInform)
 
-//  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID + "/action"
-  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
-//  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
-  procon30Token := "procon30_example_token"
+  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID + "/action"
+//  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
+  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
+//  procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest(
     "POST",
@@ -210,11 +210,11 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
-//  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID
-  procon30RequestUrl := "http://127.0.0.1:" + port + "/matches/"  + matchID
+  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID
+//  procon30RequestUrl := "http://127.0.0.1:" + port + "/matches/"  + matchID
   fmt.Println(procon30RequestUrl)
-//  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
-  procon30Token := "procon30_example_token"
+  procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
+//  procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest("GET", procon30RequestUrl, nil)
   if err != nil {
