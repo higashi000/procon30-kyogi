@@ -54,7 +54,7 @@ func main() {
 
   myTeamID, _ = strconv.Atoi(args[2])
   maxTurn = args[3]
-  matchID = args[6]
+  matchID := args[6]
   thinkingTime, _ = strconv.Atoi(args[5])
   serverAddress := args[0] + ":" + args[1]
   fmt.Println(serverAddress)
@@ -128,9 +128,6 @@ func rsvHumanData(cntConect *int, rsvData string, port string) {
   sendResult(answer, port, "1")
   *cntConect = 0;
 }
-
-
-
 func rsvSolverData(cntConect *int, rsvData string, port string, matchID string) {
 
   answer := make([]Action, 0)
@@ -211,7 +208,7 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
-  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + matchID
+  procon30RequestUrl := "http://10.10.52.252:" + port + "/matches/"  + "260"
   procon30Token := "3894ab6b0b08327a5495c45a7be65e9f4df6b7c75fef2fd126b5086f96bd9553"
 
   req, err := http.NewRequest("GET", procon30RequestUrl, nil)
@@ -359,7 +356,7 @@ func convertJsonToSendData() string {
 
   var rsvData []byte
 
-  requestFieldData("1", "8080", &rsvData)
+  requestFieldData("508", "80", &rsvData)
 
   if err := json.Unmarshal(rsvData, &fieldData); err != nil {
     log.Fatal(err)
@@ -401,7 +398,7 @@ func convertJsonToSendData() string {
   }
   convertData += "\n"
 
-  convertData += strconv.Itoa(len(fieldData.Teams[0].Agents))
+  convertData += strconv.Itoa(len(fieldData.Teams[1].Agents))
   convertData += "\n"
 
   if fieldData.Teams[0].TeamID == myTeamID {
