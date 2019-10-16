@@ -38,11 +38,12 @@ struct Field {
       this.rivalAgentData[i][2] = field.rivalAgentData[i][2];
     }
     this.rivalTeamID = field.rivalTeamID;
+    this.moveType = new string[field.agentNum];
 
-    moveAgent(myMoveDir, whichTeam);
-    calcTilePoint();
-    calcMyAreaPoint();
-    calcRivalAreaPoint();
+//   moveAgent(myMoveDir, whichTeam);
+    /* calcTilePoint(); */
+    /* calcMyAreaPoint(); */
+    /* calcRivalAreaPoint(); */
   }
 
   this(Field field) {
@@ -61,10 +62,11 @@ struct Field {
     this.myAgentData = field.myAgentData;
     this.rivalTeamID = field.rivalTeamID;
     this.rivalAgentData = field.rivalAgentData;
+    this.moveType = new string[field.agentNum];
 
-    calcTilePoint();
-    calcMyAreaPoint();
-    calcRivalAreaPoint();
+    /* calcTilePoint(); */
+    /* calcMyAreaPoint(); */
+    /* calcRivalAreaPoint(); */
   }
 
   int[] myMoveDir;
@@ -86,6 +88,7 @@ struct Field {
   int turn;
   bool[][] myAreaPointFlg;
   bool[][] rivalAreaPointFlg;
+  string[] moveType;
 
   // 移動方向
   int[] dx = [0, -1, -1, 0, 1, 1, 1, 0, -1];
@@ -116,6 +119,16 @@ struct Field {
 
       checkDuplicate(true, tmpAgentPos);
       checkDuplicate(true, tmpAgentPos);
+
+      foreach (i; 0 .. agentNum) {
+        if (tmpAgentPos[i][1] == myAgentData[i][2] && tmpAgentPos[i][0] == myAgentData[i][1]) {
+          moveType[i] = "stay";
+        } else if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == rivalTeamID) {
+          moveType[i] = "remove";
+        } else {
+          moveType[i] = "move";
+        }
+      }
 
       foreach (i; 0 .. agentNum) {
         if (color[tmpAgentPos[i][1]][tmpAgentPos[i][0]] == rivalTeamID) {

@@ -44,6 +44,7 @@ type Action struct {
 var myTeamID int
 var maxTurn string
 var thinkingTime int
+var management string
 
 func main() {
   starttUnixTime := time.Now().Unix()
@@ -54,6 +55,8 @@ func main() {
 
   myTeamID, _ = strconv.Atoi(args[2])
   maxTurn = args[3]
+  matchID := args[6]
+  management := args[7]
   thinkingTime, _ = strconv.Atoi(args[5])
   serverAddress := args[0] + ":" + args[1]
   fmt.Println(serverAddress)
@@ -69,20 +72,13 @@ func main() {
   cntConect = 0
 
   for {
-    connectClient(listener, args[4], &cntConect, &starttUnixTime)
+    connectClient(listener, args[4], &cntConect, &starttUnixTime, matchID)
 //    go connectClient(listener, args[4], &cntConect )
   }
 }
 
-func connectClient(listener net.Listener, serverPORT string, cntConect *int, starttUnixTime *int64) {
+func connectClient(listener net.Listener, serverPORT string, cntConect *int, starttUnixTime *int64, matchID string) {
   conn, err := listener.Accept()
-
-  for {
-    nowTime := time.Now().Unix()
-    if int64(thinkingTime) + *starttUnixTime <= nowTime {
-      break
-    }
-  }
 
   *starttUnixTime = time.Now().Unix()
 
@@ -101,11 +97,11 @@ func connectClient(listener net.Listener, serverPORT string, cntConect *int, sta
   fmt.Println(string(rsvData))
   switch string(rsvData[0:2]) {
     case "sf" :
-      conn.Write([]byte(convertJsonToSendData()))
+      conn.Write([]byte(convertJsonToSendData(matchID, serverPORT)))
     case "gf" :
-      conn.Write([]byte(convertJsonToSendDataForGUI()))
+      conn.Write([]byte(convertJsonToSendDataForGUI(matchID, serverPORT)))
     case "2s" :
-      rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT)
+      rsvSolverData(cntConect, string(rsvData[3:n]), serverPORT, matchID)
     case "2g" :
       rsvGUIData(cntConect, string(rsvData[3:n]), serverPORT)
     case "gg" :
@@ -134,10 +130,7 @@ func rsvHumanData(cntConect *int, rsvData string, port string) {
   sendResult(answer, port, "1")
   *cntConect = 0;
 }
-
-
-
-func rsvSolverData(cntConect *int, rsvData string, port string) {
+func rsvSolverData(cntConect *int, rsvData string, port string, matchID string) {
 
   answer := make([]Action, 0)
 
@@ -154,7 +147,7 @@ func rsvSolverData(cntConect *int, rsvData string, port string) {
     answer = append(answer, Action{agentID, moveType, dx, dy})
   }
 
-  sendResult(answer, port, "1")
+  sendResult(answer, port, matchID)
   *cntConect = 0;
 }
 
@@ -190,8 +183,9 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 
   fmt.Println(sendMoveInform)
 
-  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
-  procon30Token := "procon30_example_token"
+  procon30RequestUrl := "http://" + management + ":"+ port + "/matches/"  + matchID + "/action"
+//  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
+//  procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest(
     "POST",
@@ -212,11 +206,15 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
   fmt.Println(resp);
 
   defer resp.Body.Close()
+
+  time.Sleep(1500 * time.Millisecond)
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
-  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID
-  procon30Token := "procon30_example_token"
+  procon30RequestUrl := "http://" + management + ":"+ port + "/matches/"  + matchID + "/action"
+//  procon30RequestUrl := "http://127.0.0.1:" + port + "/matches/"  + matchID
+  fmt.Println(procon30RequestUrl)
+//  procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest("GET", procon30RequestUrl, nil)
   if err != nil {
@@ -358,12 +356,14 @@ func integrationArea(field FieldData) [][]int {
 }
 
 // Jsonをsolverに送るために変換 {{{
-func convertJsonToSendData() string {
+func convertJsonToSendData(matchID string, serverPORT string) string {
   var fieldData FieldData
 
   var rsvData []byte
 
-  requestFieldData("1", "8080", &rsvData)
+  requestFieldData(matchID, serverPORT, &rsvData)
+
+  fmt.Println(string(rsvData))
 
   if err := json.Unmarshal(rsvData, &fieldData); err != nil {
     log.Fatal(err)
@@ -405,7 +405,8 @@ func convertJsonToSendData() string {
   }
   convertData += "\n"
 
-  convertData += strconv.Itoa(len(fieldData.Teams[0].Agents))
+  agentNum := len(fieldData.Teams[0].Agents)
+  convertData += strconv.Itoa(agentNum)
   convertData += "\n"
 
   if fieldData.Teams[0].TeamID == myTeamID {
@@ -455,12 +456,12 @@ func convertJsonToSendData() string {
 }
 //}}}
 // JsonをGUIに送るために変換 {{{
-func convertJsonToSendDataForGUI() string {
+func convertJsonToSendDataForGUI(matchID string, serverPORT string) string {
   var fieldData FieldData
 
   var rsvData []byte
 
-  requestFieldData("1", "8080", &rsvData)
+  requestFieldData(matchID, serverPORT, &rsvData)
 
   fmt.Println("aaa");
   if err := json.Unmarshal(rsvData, &fieldData); err != nil {
