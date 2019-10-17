@@ -2,6 +2,13 @@
 
 nit-ok prcon30競技部門のリポジトリ
 
+## チームメンバー
+- [ひがし](https://twitter.com/higashi136_2)
+- [えびな](https://twitter.com/ebina_hoge)
+- [ハラショー](https://twitter.com/harasho_man)
+- [かりんと](https://twitter.com/k41t_)
+- [らず](https://twitter.com/razu404)
+
 ## 動作環境
 - Ubuntu18.04
 
