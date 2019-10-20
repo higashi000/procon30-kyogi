@@ -216,4 +216,19 @@ func updateFieldData(field *FieldData, action Actions, whichTeam int) {
       }
     }
   }
+
+  tmpTeam1Tile := 0
+  tmpTeam2Tile := 0
+  for i := 0; i < field.Height; i++ {
+    for j := 0; j < field.Width; j++ {
+      if field.Tiled[i][j] == field.Teams[0].TeamID {
+        tmpTeam1Tile += field.Points[i][j]
+      } else if field.Tiled[i][j] == field.Teams[1].TeamID {
+        tmpTeam2Tile += field.Points[i][j]
+      }
+    }
+  }
+
+  field.Teams[0].TilePoint = tmpTeam1Tile;
+  field.Teams[1].TilePoint = tmpTeam2Tile;
 }
