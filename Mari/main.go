@@ -44,7 +44,6 @@ type Action struct {
 var myTeamID int
 var maxTurn string
 var thinkingTime int
-var management string
 
 func main() {
   starttUnixTime := time.Now().Unix()
@@ -56,7 +55,6 @@ func main() {
   myTeamID, _ = strconv.Atoi(args[2])
   maxTurn = args[3]
   matchID := args[6]
-  management := args[7]
   thinkingTime, _ = strconv.Atoi(args[5])
   serverAddress := args[0] + ":" + args[1]
   fmt.Println(serverAddress)
@@ -183,9 +181,9 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 
   fmt.Println(sendMoveInform)
 
-  procon30RequestUrl := "http://" + management + ":"+ port + "/matches/"  + matchID + "/action"
-//  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
-//  procon30Token := "procon30_example_token"
+//  procon30RequestUrl := "http://" + management + ":"+ port + "/matches/"  + matchID + "/action"
+  procon30RequestUrl := "http://localhost:" + port + "/matches/"  + matchID + "/action"
+  procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest(
     "POST",
@@ -211,10 +209,10 @@ func sendResult(solverAnswer []Action, port string, matchID string) {
 }
 
 func requestFieldData(matchID string, port string, rsvData *[]byte) {
-  procon30RequestUrl := "http://" + management + ":"+ port + "/matches/"  + matchID + "/action"
-//  procon30RequestUrl := "http://127.0.0.1:" + port + "/matches/"  + matchID
+//  procon30RequestUrl := "http://" + management + ":"+ port + "/matches/"  + matchID + "/action"
+  procon30RequestUrl := "http://127.0.0.1:" + port + "/matches/"  + matchID
   fmt.Println(procon30RequestUrl)
-//  procon30Token := "procon30_example_token"
+  procon30Token := "procon30_example_token"
 
   req, err := http.NewRequest("GET", procon30RequestUrl, nil)
   if err != nil {
@@ -319,6 +317,7 @@ func checkArea(field FieldData, teamID int) [][]bool {
 
 func integrationArea(field FieldData) [][]int {
   var areaPoint [][]int
+
 
   for i := 0; i < field.Height; i++ {
     tmp := []int{}
@@ -527,7 +526,7 @@ func convertJsonToSendDataForGUI(matchID string, serverPORT string) string {
 
       convertData += strconv.Itoa(fieldData.Teams[i].TilePoint)
       convertData += " "
-      convertData += strconv.Itoa(fieldData.Teams[i].AreaPoint)
+      convertData += "0"
       convertData += "\n"
     }
   } else {
